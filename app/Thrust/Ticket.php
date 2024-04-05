@@ -64,27 +64,31 @@ class Ticket extends Resource
     public function mainActions()
     {
         return [
-            new NewTicket,
+            new NewTicket(),
         ];
     }
 
     public function actions()
     {
+        return [];
+
         return [
-            new MergeTickets,
-            new ChangeStatus,
-            new ChangePriority,
+            new MergeTickets(),
+            new ChangeStatus(),
+            new ChangePriority(),
         ];
     }
 
     public function filters()
     {
+        return [];
+
         return [
-            new TitleFilter,
-            new StatusFilter,
-            new PriorityFilter,
-            new EscalatedFilter,
-            new TicketTypeFilter,
+            new TitleFilter(),
+            new StatusFilter(),
+            new PriorityFilter(),
+            new EscalatedFilter(),
+            new TicketTypeFilter(),
         ];
     }
 

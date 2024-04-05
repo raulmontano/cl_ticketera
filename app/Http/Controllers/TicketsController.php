@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Repositories\TicketsIndexQuery;
 use App\Repositories\TicketsRepository;
 use App\Ticket;
+use App\Attachment;
 use BadChoice\Thrust\Controllers\ThrustController;
 
 class TicketsController extends Controller
 {
     public function index()
     {
-        return (new ThrustController)->index('tickets');
+        return (new ThrustController())->index('tickets');
     }
 
     /*public function index(TicketsRepository $repository)
@@ -36,17 +37,53 @@ class TicketsController extends Controller
 
     public function store()
     {
-        $this->validate(request(), [
-            'requester' => 'required|array',
-            'title'     => 'required|min:3',
-            'body'      => 'required',
-            'team_id'   => 'nullable|exists:teams,id',
-        ]);
-        $ticket = Ticket::createAndNotify(request('requester'), request('title'), request('body'), request('tags'));
-        $ticket->updateStatus(request('status'));
+        $rules = [
+          'title'     => 'required|min:3',
+          'body'      => 'required',
+          'channels'  => 'required|array|min:1',
+          'categories'=> 'required|array|min:1',
+          'post_type' => 'required|exists:ticket_post_types,id',
+          'type'      => 'required|exists:ticket_types,id',
+          'company'   => 'required|exists:ticket_companies,id',
+          'team_id'   => 'nullable|exists:teams,id',
+      ];
+
+        if ($user = \Auth::user()) {
+            //
+            $requester = ['name' => $user->name, 'email' => $user->email];
+        } else {
+            $rules[] = ['requester' => 'required|array'];
+            $requester = request('requester');
+        }
+
+        $this->validate(request(), $rules);
+
+        $ticket = Ticket::createAndNotify(
+            $requester,
+            request('title'),
+            request('body'),
+            request('channels'),
+            request('categories'),
+            request('type'),
+            request('company'),
+            request('post_type'),
+        );
+
+        //FIXME
+        if (request('status')) {
+            //update
+            $ticket->updateStatus(request('status'));
+        } else {
+            //create
+            $ticket->updateStatus(Ticket::STATUS_NEW);
+        }
 
         if (request('team_id')) {
             $ticket->assignToTeam(request('team_id'));
+        }
+
+        if ($ticket && request()->hasFile('attachment')) {
+            Attachment::storeAttachmentFromRequest(request(), $ticket);
         }
 
         return redirect()->route('tickets.show', $ticket);
@@ -61,16 +98,34 @@ class TicketsController extends Controller
 
     public function update(Ticket $ticket)
     {
-        $this->validate(request(), [
-            'requester' => 'required|array',
-            'priority'  => 'required|integer',
-            'type'      => 'integer',
-            //'subject'   => 'string|nullable',
-            //'summary'   => 'string'
-            //'title'      => 'required|min:3',
-        ]);
-        $ticket->updateWith(request('requester'), request('priority'), request('type'))
-                ->updateSummary(request('subject'), request('summary'));
+        $rules = [
+                    'title'     => 'required|min:3',
+                    'body'      => 'required',
+                    'channels'  => 'required|array|min:1',
+                    'categories'=> 'required|array|min:1',
+                    'post_type' => 'required|exists:ticket_post_types,id',
+                    'type'      => 'required|exists:ticket_types,id',
+                    'company'   => 'required|exists:ticket_companies,id',
+                    //'team_id'   => 'nullable|exists:teams,id',
+                    'priority'  => 'required|integer',
+                ];
+
+        $this->validate(request(), $rules);
+
+        $ticket->updateWith(
+            request('title'),
+            request('body'),
+            request('channels'),
+            request('categories'),
+            request('type'),
+            request('company'),
+            request('post_type'),
+            request('priority'),
+        );
+
+        if ($ticket && request()->hasFile('attachment')) {
+            Attachment::storeAttachmentFromRequest(request(), $ticket);
+        }
 
         return back();
     }

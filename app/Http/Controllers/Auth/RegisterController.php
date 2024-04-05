@@ -69,6 +69,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
+            'locale'   => env('APP_LOCALE', 'es'), //APP_LOCALE=es
             'password' => bcrypt($data['password']),
         ]);
         Team::findByToken($data['team_token'])->members()->attach($user);

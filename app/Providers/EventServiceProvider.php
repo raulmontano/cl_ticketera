@@ -22,6 +22,7 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\TicketStatusUpdated' => [
             'App\Listeners\UpdateStatusKpis',
             'App\Listeners\UpdateIssueWithTicketStatus',
+            'App\Listeners\SendToTeamWithTicketStatus',
         ],
         'App\Events\TicketRated' => [
             'App\Listeners\UpdateRatedKpi',

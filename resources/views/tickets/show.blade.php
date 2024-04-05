@@ -1,44 +1,83 @@
 @extends('layouts.app')
 @section('content')
-    <div class="description comment">
+    <div class="description">
         <div class="breadcrumb">
-            <a href="{{ route('tickets.index') }}">{{ trans_choice('ticket.ticket', 2) }}</a>
+            <a href="{{ route('tickets.index') }}">&lt; {{ trans_choice('ticket.ticket', 2) }}</a>
         </div>
-        <h3>#{{ $ticket->id }}. {{ $ticket->title }} </h3>
-        <div class="mb2">
-            @include('components.ticket.rating')
-        </div>
+        <div class="card">
+          <h3 class="card-header">
+            #{{ $ticket->id }}. {{ $ticket->title }} <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} · <b>{{ $ticket->created_at->diffForHumans() }}</b></div>
+          </h3>
+            <div class="card-body">
+              <p class="card-text">{!! nl2br($ticket->body) !!}</p>
+            </div>
+            <div class="card-footer">
 
-        @include('components.ticket.actions')
-        @include('components.ticket.header')
-        @include('components.ticket.merged')
-        <br>
+              @include('components.ticket.header')
+              @include('components.ticket.merged')
+
+              @if( $ticket->canBeEdited() )
+                  <div id="edit-ticket-button" class="float-right mr4">
+
+                    <button class="btn btn-primary" onClick="$('#edit-ticket-button').hide(); $('#ticket-info').hide(); $('#ticket-edit').show()">{{ __('ticket.edit') }}</button>
+
+                  </div>
+              @endif
+
+            </div>
+        </div>
     </div>
 
 
     @if( $ticket->canBeEdited() )
-        @include('components.assignActions', ["endpoint" => "tickets", "object" => $ticket])
-        <div class="comment new-comment">
+    <div class="description">
+        @if(!$ticket->user)
+        <div class="actions card mb-3">
+          @include('components.assignActions', ["endpoint" => "tickets", "object" => $ticket])
+        </div>
+        @endif
+
+        <div class="actions card">
             {{ Form::open(["url" => route("comments.store", $ticket) , "files" => true, "id" => "comment-form"]) }}
-            <textarea id="comment-text-area" name="body">@if(auth()->user()->settings->tickets_signature)&#13;&#13;{{ auth()->user()->settings->tickets_signature }}@endif</textarea>
-            @include('components.uploadAttachment', ["attachable" => $ticket, "type" => "tickets"])
-            {{ Form::hidden('new_status', $ticket->status, ["id" => "new_status"]) }}
-            @if($ticket->isEscalated() )
-                <button class="mt1 uppercase ph3"> @icon(comment) {{ __('ticket.note') }} </button>
-            @else
-                <div class="mb1">
-                    {{ __('ticket.note') }}: {{ Form::checkbox('private') }}
-                </div>
-                <button class="mt1 uppercase ph3"> @icon(comment) {{ __('ticket.commentAs') }} {{ $ticket->statusName() }}</button>
-                <span class="dropdown button caret-down"> @icon(caret-down) </span>
-                <ul class="dropdown-container">
-                    <li><a class="pointer" onClick="setStatusAndSubmit( {{ App\Ticket::STATUS_OPEN    }} )"><div style="width:10px; height:10px" class="circle inline ticket-status-open mr1"></div> {{ __('ticket.commentAs') }} <b>{{ __("ticket.open") }}   </b> </a></li>
-                    <li><a class="pointer" onClick="setStatusAndSubmit( {{ App\Ticket::STATUS_PENDING }} )"><div style="width:10px; height:10px" class="circle inline ticket-status-pending mr1"></div> {{ __('ticket.commentAs') }} <b>{{ __("ticket.pending") }}</b> </a></li>
-                    <li><a class="pointer" onClick="setStatusAndSubmit( {{ App\Ticket::STATUS_SOLVED  }} )"><div style="width:10px; height:10px" class="circle inline ticket-status-solved mr1"></div> {{ __('ticket.commentAs') }} <b>{{ __("ticket.solved") }} </b> </a></li>
-                </ul>
-            @endif
+
+
+            <table class="w80 no-padding">
+
+                <tr>
+
+                  <td class="p2">
+                      <select id="new_status" name="new_status">
+                          @if($ticket->team->id == 2)
+                            <option value="{{\App\Ticket::STATUS_NEW}}"  @if($ticket->status == App\Ticket::STATUS_NEW) selected @endif>{{ __("ticket.new" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_OPEN}}"  @if($ticket->status == App\Ticket::STATUS_OPEN) selected @endif>{{ __("ticket.open" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_PENDING}}" @if($ticket->status == App\Ticket::STATUS_PENDING) selected disabled @endif>{{ __("ticket.pending" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_SOLVED}}"  @if($ticket->status == App\Ticket::STATUS_SOLVED) selected @endif>{{ __("ticket.solved" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_CLOSED}}"  @if($ticket->status == App\Ticket::STATUS_CLOSED) selected @endif>{{ __("ticket.closed" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_SPAM}}"  @if($ticket->status == App\Ticket::STATUS_SPAM) selected @endif>{{ __("ticket.spam" ) }}</option>
+                          @else
+                            <option value="{{\App\Ticket::STATUS_PENDING}}"  @if($ticket->status == App\Ticket::STATUS_PENDING) selected @endif>{{ __("ticket.pending" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_SOLVED}}"  @if($ticket->status == App\Ticket::STATUS_SOLVED) selected @endif>{{ __("ticket.solved" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_PAUSED}}"  @if($ticket->status == App\Ticket::STATUS_PAUSED) selected @endif>{{ __("ticket.paused" ) }}</option>
+                            <option value="{{\App\Ticket::STATUS_ERROR}}"  @if($ticket->status == App\Ticket::STATUS_ERROR) selected @endif>{{ __("ticket.error" ) }}</option>
+                          @endif
+
+                      </select>
+                  </td>
+
+                <td class="w10 p2">
+                  <textarea id="comment-text-area" cols="40" rows="3" placeholder="Mensaje (opcional)" name="body" cols="20">@if(auth()->user()->settings->tickets_signature)&#13;&#13;{{ auth()->user()->settings->tickets_signature }}@endif</textarea>
+                </td>
+            <td >
+                  <button class="ph3 ml1 btn btn-primary">{{ __('ticket.update') }} {{ __('ticket.status')}}</button>
+            </td>
+
+          </tr>
+
+          </table>
+
             {{ Form::close() }}
         </div>
+      </div>
     @endif
 
     @include('components.ticketComments', ["comments" => $ticket->commentsAndNotesAndEvents()->sortBy('created_at')->reverse() ])
@@ -46,13 +85,9 @@
 
 
 @section('scripts')
-    @include('components.js.taggableInput', ["el" => "tags", "endpoint" => "tickets", "object" => $ticket])
 
     <script>
-        function setStatusAndSubmit(new_status){
-            $("#new_status").val(new_status);
-            $("#comment-form").submit();
-        }
+
         $("#comment-text-area").mention({
             delimiter: '@',
             emptyQuery: true,

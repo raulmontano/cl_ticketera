@@ -10,7 +10,7 @@ class TicketsRepository
     public function escalated()
     {
         if (auth()->user()->assistant) {
-            return Ticket::whereLevel(1)->where('status', '<', Ticket::STATUS_SOLVED);
+            return Ticket::whereLevel(1)->where('status', '<', 99);
         }
 
         return Ticket::whereStatus(100);
@@ -18,25 +18,30 @@ class TicketsRepository
 
     public function assignedToMe()
     {
-        return auth()->user()->tickets()->where('status', '<', Ticket::STATUS_SOLVED);
+        return auth()->user()->tickets()->where('status', '<', 99);
     }
 
     public function unassigned()
     {
         if (auth()->user()->admin) {
-            return Ticket::whereNull('user_id')->where('status', '<', Ticket::STATUS_SOLVED);
+            return Ticket::whereNull('user_id')->where('status', '<', 99);
         }
 
-        return auth()->user()->teamsTickets()->whereRaw('tickets.user_id is NULL')->where('status', '<', Ticket::STATUS_SOLVED);
+        return auth()->user()->teamsTickets()->whereRaw('tickets.user_id is NULL')->where('status', '<', 99);
+    }
+
+    public function pending()
+    {
+        return Ticket::whereIn('status', [Ticket::STATUS_PENDING,Ticket::STATUS_PAUSED,Ticket::STATUS_ERROR]);
     }
 
     public function all()
     {
         if (auth()->user()->admin) {
-            return Ticket::where('status', '<', Ticket::STATUS_SOLVED);
+            return Ticket::where('status', '<', 99);
         }
 
-        return auth()->user()->teamsTickets()->where('status', '<', Ticket::STATUS_SOLVED);
+        return auth()->user()->teamsTickets()->where('status', '<', 99);
     }
 
     public function recentlyUpdated()

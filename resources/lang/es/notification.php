@@ -3,19 +3,26 @@
 return [
     'newLeadCreatedDesc' => 'Se ha creado un nuevo lead',
     'leadAssigned'       => 'Lead asignado',
-    'newTicketCreated'   => 'Nuevo tíquet creado',
-    'newTicket'          => 'Nuevo tíquet',
-    'ticketCreated'      => 'Tíquet creado',
-    'ticketAssigned'     => 'Tíquet asignado',
-    'ticketAssignedTo'   => 'Tíquet asignado a',
-    'ticketUpdated'      => 'Tíquet actualizado',
-    'ticketEscalated'    => 'Tíquet escalado',
+    'newTicketCreated'   => 'Nueva Solicitud creada',
+    'newTicket'          => 'Nueva Solicitud',
+    'ticketCreated'      => 'Solicitud creada',
+    'ticketAssigned'     => 'Solicitud asignada',
+    'ticketAssignedTo'   => 'Solicitud asignada a',
+    'ticketUpdated'      => 'Solicitud actualizada',
+    'ticketEscalated'    => 'Solicitud escalada',
     'newIdea'            => 'Nueva idea',
     'newIdeaCreated'     => 'Nueva idea',
     'mention'            => 'Mención',
-    'rateTicket'         => 'Clasifica el tiquet',
-    'rateTicketDesc'     => 'Nos encantaría saber tu feedback sobre este tiquet. Simplemente pulsa sobre el número para ayudarnos a seguir mejorando!',
-    'ticketRated'        => 'Tiquet clasificado',
+    'rateTicket'         => 'Clasifica la Solicitud',
+    'rateTicketDesc'     => 'Nos encantaría saber tu feedback sobre esta Solicitud. Simplemente pulsa sobre el número para ayudarnos a seguir mejorando!',
+    'ticketRated'        => 'Solicitud calificada',
     'answerTicket'       => 'Añada un comentario respondiendo a este correo electrónico o',
     'answerTicketLink'   => 'ver el ticket en Handesk',
+
+    'events' => [
+      'assignedTo'   => 'Asignada a agente',
+      'assignedToTeam' => 'Asignada a equipo',
+      'updateStatus' => 'Estado actualizado',
+    ]
+
 ];

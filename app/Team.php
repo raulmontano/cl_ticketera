@@ -68,4 +68,11 @@ class Team extends BaseModel
             return [$team->name => $team->members->pluck('name', 'id')->toArray()];
         })->toArray();
     }
+
+    public static function usersWithoutTeam()
+    {
+        $usersWithoutTeam = User::has('teams', '<', 1)->pluck('name', 'id')->toArray();
+
+        return [__('team.mc') => [null => '--'] + $usersWithoutTeam];
+    }
 }

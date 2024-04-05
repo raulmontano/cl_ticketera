@@ -16,6 +16,8 @@ class TicketsIndexQuery
             $tickets = $repository->assignedToMe();
         } elseif (request('unassigned')) {
             $tickets = $repository->unassigned();
+        } elseif (request('pending')) {
+            $tickets = $repository->pending();
         } elseif (request('recent')) {
             $tickets = $repository->recentlyUpdated();
         } elseif (request('solved')) {
@@ -30,7 +32,7 @@ class TicketsIndexQuery
             $tickets = $repository->all();
         }
 
-        $tickets = (new TicketFilters)->apply($tickets, request()->all());
+        $tickets = (new TicketFilters())->apply($tickets, request()->all());
 
         if (request('team')) {
             $tickets = $tickets->where('tickets.team_id', request('team'));

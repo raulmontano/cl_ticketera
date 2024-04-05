@@ -19,30 +19,59 @@ use Illuminate\Support\Str;
 
 class Ticket extends BaseModel
 {
-    use SoftDeletes, Taggable, Assignable, Subscribable, Rateable;
+    use SoftDeletes;
+    use Taggable;
+    use Categorizable;
+    use Assignable;
+    use Subscribable;
+    use Rateable;
 
-    const STATUS_NEW     = 1;
-    const STATUS_OPEN    = 2;
-    const STATUS_PENDING = 3;
-    const STATUS_SOLVED  = 4;
-    const STATUS_CLOSED  = 5;
-    const STATUS_MERGED  = 6;
-    const STATUS_SPAM    = 7;
+    /** ESTATUS MEJORA CONTINUA **/
+    //    1=En Espera (por defecto)
+    //    2=En Validación.
+    //    3=Enviado a Editores. //EVENTO CUANDO SE ASIGNE TEAM SE CAMBIA ESTATUS
+    //    4=Solucionado.
+    //    5=Rechazado.
+    //    7=Cerrado sin gestión.
 
-    const PRIORITY_LOW       = 1;
-    const PRIORITY_NORMAL    = 2;
-    const PRIORITY_HIGH      = 3;
-    const PRIORITY_BLOCKER   = 4;
+    /** ESTATUS EDITORES **/
+    //    3=Enviado a Editores (por defecto)
+    //    4=Resuelto=Solucionado
+    //    8=Pausado
+    //    9=Error en documento. //EVENTO CUANDO SE PONGA ESTE ESTATUS SE DEBE QUITAR EL TEAM
 
-    public static function createAndNotify($requester, $title, $body, $tags)
+    public const STATUS_NEW     = 1; //En espera
+    public const STATUS_OPEN    = 2; //En Validación.
+    public const STATUS_PENDING = 3; //Enviado a Editores. //EVENTO CUANDO SE ASIGNE TEAM SE CAMBIA ESTATUS
+    public const STATUS_SOLVED  = 4; //Solucionado.
+    public const STATUS_CLOSED  = 5; //Rechazado.
+    public const STATUS_MERGED  = 6;
+    public const STATUS_SPAM    = 7; //Cerrado sin gestión.
+    public const STATUS_PAUSED  = 8; //Pausado
+    public const STATUS_ERROR   = 9; //Error en documento. //EVENTO CUANDO SE PONGA ESTE ESTATUS SE DEBE QUITAR EL TEAM Y REGRESAR A MEJORA CONTINUA
+
+    public const PRIORITY_LOW       = 1; //COMUNICAR=NO
+    public const PRIORITY_NORMAL    = 2;
+    public const PRIORITY_HIGH      = 3; //COMUNICAR=SI
+    public const PRIORITY_BLOCKER   = 4;
+
+    public static function createAndNotify($requester, $title, $body, $channels, $categories, $type, $company, $post_type)
     {
         $requester = Requester::findOrCreate($requester['name'] ?? 'Unknown', $requester['email'] ?? null);
         $ticket    = $requester->tickets()->create([
             'title'        => substr($title, 0, 190),
             'body'         => $body,
+            'ticket_type_id'         => $type,
+            'ticket_company_id'         => $company,
+            'ticket_post_type_id'         => $post_type,
             'public_token' => Str::random(24),
             'team_id'      => Settings::defaultTeamId(),
-        ])->attachTags($tags);
+            'priority' => self::PRIORITY_LOW,
+        ]);
+
+        $ticket->attachTags($channels); //channels
+        $ticket->attachCategories($categories); //categories
+
         tap(new TicketCreated($ticket), function ($newTicketNotification) use ($ticket) {
             Admin::notifyAll($newTicketNotification);
             if ($ticket->team) {
@@ -53,14 +82,20 @@ class Ticket extends BaseModel
         return $ticket;
     }
 
-    public function updateWith($requester, $priority, $ticket_type_id)
+    public function updateWith($title, $body, $channels, $categories, $type, $company, $post_type, $priority)
     {
-        $requester = Requester::findOrCreate($requester['name'] ?? 'Unknown', $requester['email'] ?? null);
         $this->update([
-            'priority'       => $priority,
-            'requester_id'   => $requester->id,
-            'ticket_type_id' => $ticket_type_id,
+          'title'        => substr($title, 0, 190),
+          'body'         => $body,
+          'ticket_type_id'         => $type,
+          'ticket_company_id'         => $company,
+          'ticket_post_type_id'         => $post_type,
+          'priority' => $priority,
         ]);
+
+        $this->syncTags($channels); //channels
+
+        $this->syncCategories($categories);
 
         return $this;
     }
@@ -117,6 +152,11 @@ class Ticket extends BaseModel
         return $this->morphToMany(Tag::class, 'taggable');
     }
 
+    public function categories()
+    {
+        return $this->morphToMany(Tag::class, 'categorizable');
+    }
+
     public function attachments()
     {
         return $this->morphMany(Attachment::class, 'attachable');
@@ -130,6 +170,16 @@ class Ticket extends BaseModel
     public function type()
     {
         return $this->belongsTo(TicketType::class, 'ticket_type_id');
+    }
+
+    public function postType()
+    {
+        return $this->belongsTo(TicketPostType::class, 'ticket_post_type_id');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(TicketCompany::class, 'ticket_company_id');
     }
 
     /**
@@ -156,7 +206,7 @@ class Ticket extends BaseModel
     private function associateUserIfNecessary($user)
     {
         if (! $this->user && $user) {
-            $this->user()->associate($user)->save();
+            $this->assignTo($user);
         }
     }
 
@@ -171,7 +221,7 @@ class Ticket extends BaseModel
             return $this->addNote($user, $body);
         }
         $previousStatus = $this->updateStatusFromComment($user, $newStatus);
-        $this->associateUserIfNecessary($user);
+        //$this->associateUserIfNecessary($user); //deleted
 
         if (! $body || ($user && $body === $user->settings->tickets_signature)) {
             return null;
@@ -221,7 +271,7 @@ class Ticket extends BaseModel
     public function updateStatus($status)
     {
         $this->update(['status' => $status, 'updated_at' => Carbon::now()]);
-        TicketEvent::make($this, 'Status updated: '.$this->statusName());
+        TicketEvent::make($this, trans('notification.events.updateStatus').': '.trans("ticket." . $this->statusName()));
         if ($status == Ticket::STATUS_SOLVED && ! $this->rating && config('handesk.sendRatingEmail')) {
             $this->requester->notify((new RateTicket($this))->delay(now()->addMinutes(60)));
         }
@@ -279,6 +329,8 @@ class Ticket extends BaseModel
             case static::STATUS_CLOSED: return 'closed';
             case static::STATUS_MERGED: return 'merged';
             case static::STATUS_SPAM: return 'spam';
+            case static::STATUS_PAUSED: return 'paused';
+            case static::STATUS_ERROR: return 'error';
         }
     }
 
@@ -290,9 +342,9 @@ class Ticket extends BaseModel
     public static function priorityNameFor($priority)
     {
         switch ($priority) {
-            case static::PRIORITY_LOW: return 'low';
+            case static::PRIORITY_LOW: return 'low'; //no
             case static::PRIORITY_NORMAL: return 'normal';
-            case static::PRIORITY_HIGH: return 'high';
+            case static::PRIORITY_HIGH: return 'high'; //sí
             case static::PRIORITY_BLOCKER: return 'blocker';
         }
     }
@@ -319,10 +371,10 @@ class Ticket extends BaseModel
     {
         $repo  = explode('/', $repository);
         $issue = $issueCreator->createIssue(
-                $repo[0],
-                $repo[1],
-                $this->subject ?? $this->title,
-                'Issue from ticket: '.route('tickets.show', $this)."   \n\r".($this->summary ?? $this->body)
+            $repo[0],
+            $repo[1],
+            $this->subject ?? $this->title,
+            'Issue from ticket: '.route('tickets.show', $this)."   \n\r".($this->summary ?? $this->body)
         );
         $issueUrl = "https://bitbucket.org/{$repository}/issues/{$issue->id}";
         $this->addNote(auth()->user(), "Issue created {$issueUrl} with id #{$issue->id}");

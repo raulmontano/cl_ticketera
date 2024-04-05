@@ -16,6 +16,9 @@ Route::get('/', 'HomeController@index');
 Auth::routes();
 
 Route::group(['prefix' => 'requester'], function () {
+    Route::get('tickets/create', 'RequesterTicketsController@create')->name('requester.tickets.create');
+    Route::post('tickets/store', 'RequesterTicketsController@store')->name('requester.tickets.store');
+
     Route::get('tickets/{token}', 'RequesterTicketsController@show')->name('requester.tickets.show');
     Route::post('tickets/{token}/comments', 'RequesterCommentsController@store')->name('requester.comments.store');
     Route::get('tickets/{token}/rate', 'RequesterTicketsController@rate')->name('requester.tickets.rate');
@@ -52,7 +55,7 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
     Route::resource('leads/{lead}/tags', 'LeadTagsController', ['only' => ['store', 'destroy'], 'as' => 'leads']);
     Route::resource('leads/{lead}/tasks', 'LeadTasksController', ['only' => ['index', 'store', 'update', 'destroy'], 'as' => 'leads']);
 
-    Route::get('attachments/{filename}', 'AttachmentsController@show')->name('attachments');
+    Route::get('storage/attachments/{filename}', 'AttachmentsController@show')->name('attachments');
     Route::resource('tasks', 'TasksController', ['only' => ['index', 'update', 'destroy']]);
 
     Route::resource('teams', 'TeamsController');
@@ -71,6 +74,10 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
         Route::get('users/{user}/impersonate', 'UsersController@impersonate')->name('users.impersonate');
         Route::resource('settings', 'SettingsController', ['only' => ['edit', 'update']]);
         Route::get('ticketTypes', 'TicketTypesController@index')->name('ticketTypes.index');
+        Route::get('ticketPostTypes', 'TicketPostTypesController@index')->name('ticketPostTypes.index');
+        Route::get('ticketCompanies', 'TicketCompaniesController@index')->name('ticketCompanies.index');
+        Route::get('categories', 'CategoriesController@index')->name('categories.index');
+        Route::get('channels', 'ChannelsController@index')->name('channels.index');
     });
 
     Route::get('reports', 'ReportsController@index')->name('reports.index');

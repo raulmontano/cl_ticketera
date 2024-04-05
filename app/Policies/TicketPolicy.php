@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Settings;
 use App\Ticket;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -32,6 +33,7 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket)
     {
+        //FIXME mejora continua puede ver y editar pero no puede cambiar de estatus
         return  $ticket->user_id == $user->id ||
                 $user->teamsTickets()->pluck('id')->contains($ticket->id) ||
                 ($user->assistant && $ticket->isEscalated());
@@ -46,7 +48,18 @@ class TicketPolicy
      */
     public function create(User $user)
     {
-        //
+        $defaultTeamId = Settings::defaultTeamId();
+
+        $userTeams = $user->teams()->get()->pluck('id')->toArray();
+
+        $return = false;
+
+        //if users teams has defaultteamid, he can create new ticket
+        if (in_array($defaultTeamId, $userTeams)) {
+            $return = true;
+        }
+
+        return $return;
     }
 
     /**

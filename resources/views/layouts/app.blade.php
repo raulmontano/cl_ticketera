@@ -12,6 +12,8 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/all.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
@@ -22,7 +24,7 @@
 {{--        @include('layouts.header')--}}
         @include('layouts.tinyHeader')
         @include('layouts.sidebar')
-        <div class="content container-fluid">
+        <div class="content">
             @include('components.errors')
             @yield('content')
         </div>

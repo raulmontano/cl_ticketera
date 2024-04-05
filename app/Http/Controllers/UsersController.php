@@ -11,7 +11,7 @@ class UsersController extends Controller
 {
     public function index()
     {
-        return (new ThrustController)->index('agent');
+        return (new ThrustController())->index('agent');
         // $users = User::with('teams')->paginate(25);
         // return view('users.index', ['users' => $users]);
     }
@@ -39,6 +39,7 @@ class UsersController extends Controller
             'name'     => request('name'),
             'email'    => request('email'),
             'password' => Hash::make(request('password')),
+            'locale'   => env('APP_LOCALE'), //APP_LOCALE=es
             'token'    => Str::random(60),
         ]);
 

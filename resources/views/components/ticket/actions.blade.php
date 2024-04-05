@@ -11,8 +11,6 @@
         </div>
     @else
         <div class="">
-            @include('components.ticket.escalate')
-            @include('components.ticket.idea')
-            @include('components.ticket.issue')
+            @include('components.ticket.edit')
         </div>
     @endif

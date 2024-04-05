@@ -14,9 +14,13 @@ class Attachment extends BaseModel
 
     public static function storeAttachmentFromRequest($request, $attachable)
     {
-        $path = str_replace(' ', '_', $attachable->id.'_'.$request->file('attachment')->getClientOriginalName());
-        Storage::putFileAs('public/attachments/', $request->file('attachment'), $path);
-        $attachable->attachments()->create(['path' => $path]);
+        $files = $request->file('attachment');
+
+        foreach ($files as $file) {
+            $path = str_replace(' ', '_', $attachable->id.'_'.$file->getClientOriginalName());
+            Storage::putFileAs('public/attachments/', $file, $path);
+            $attachable->attachments()->create(['path' => $path]);
+        }
     }
 
     /**

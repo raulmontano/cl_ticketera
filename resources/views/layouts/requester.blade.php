@@ -13,17 +13,39 @@
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Lato:300,500" rel="stylesheet">
     <link href="{{ asset('css/all.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
 </head>
 <body>
     <div id="app">
+
+      <div class="navbar-fixed">
+          <nav class="nav-extended white darken-2">
+            <div class="center text-center" style="max-width:300px">
+                <div class="nav-wrapper">
+                  <img src="{{url("images/logo.png")}}" class="w70">
+                </div>
+              </div>
+              <!--        segunda linea de menus-->
+              <div class="nav-content">
+                <div class="center text-center tabs tabs-transparent grey darken-4">
+                  SOLICITUD DE CONTENIDO
+                </div>
+              </div>
+
+          </nav>
+      </div>
+
         <div class="center w80">
+            @include('components.errors')
             @yield('content')
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
+    @yield('scripts')
 </body>
 </html>

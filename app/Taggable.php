@@ -4,9 +4,11 @@ namespace App;
 
 trait Taggable
 {
-    public function tagsString($glue = ',')
+    public function tagsString($glue = ', ')
     {
-        return implode($glue, $this->tags->pluck('name')->toArray());
+        $tags = array_map('ucfirst', $this->tags->pluck('name')->toArray());
+
+        return implode($glue, $tags);
     }
 
     public function attachTags($tagNames)
@@ -26,5 +28,14 @@ trait Taggable
         return collect(is_array($tagNames) ? $tagNames : explode(',', $tagNames))->map(function ($tagName) {
             return Tag::firstOrCreate(['name' => strtolower($tagName)]);
         })->unique('id')->pluck('id');
+    }
+
+    public function syncTags($tags)
+    {
+        $tags = $this->findCategoriesIds($tags);
+
+        $this->tags()->sync($tags);
+
+        return $this;
     }
 }

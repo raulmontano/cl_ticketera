@@ -1,9 +1,10 @@
 @extends('layouts.requester')
 @section('content')
     <div class="description comment">
-        <h3>{{ $ticket->title }}</h3>
+        <h2>{{ $ticket->title }}</h2>
+        <p>{{ $ticket->body }}</p>
         <span class="label ticket-status-{{ $ticket->statusName() }}">{{ __('ticket.' . $ticket->statusName()) }}</span>&nbsp;
-        <span class="date">{{  $ticket->created_at->diffForHumans() }} · {{  $ticket->requester->name }}</span>
+        <span class="date">{{  $ticket->created_at->diffForHumans() }}, creado por: {{  $ticket->requester->name }} &lt;{{  $ticket->requester->email }}&gt;</span>
     </div>
 
     @if($ticket->status != App\Ticket::STATUS_CLOSED)
