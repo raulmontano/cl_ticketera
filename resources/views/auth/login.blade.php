@@ -1,13 +1,14 @@
 @extends('auth.layout')
 
 @section('content')
-    <div class="center text-center mt5" style="max-width:300px">
+    <div class="center text-center mt5" style="max-width:400px">
             <img src="{{url("images/logo.png")}}" class="w80">
-            <form class="form-horizontal" method="POST" action="{{ route('login') }}">
+
+            <form class="form-horizontal mt-2" method="POST" action="{{ route('login') }}">
                 {{ csrf_field() }}
 
-                <div class="m3">
-                    <input id="email" type="email" class="w80" name="email" value="{{ old('email') }}" required autofocus>
+                <div class="form-group">
+                    <input id="email" type="email" placeholder="Email" class="w80 form-control" name="email" value="{{ old('email') }}" required autofocus>
                     @if ($errors->has('email'))
                         <br>
                         <span class="help-block">
@@ -16,8 +17,8 @@
                     @endif
                 </div>
 
-                <div class="m3">
-                    <input id="password" type="password" class="w80" name="password" required>
+                <div class="form-group">
+                    <input id="password" type="password" placeholder="Contraseña" class="w80 form-control" name="password" required>
                     @if ($errors->has('password'))
                         <span class="help-block">
                             <strong>{{ $errors->first('password') }}</strong>
@@ -25,16 +26,17 @@
                     @endif
                 </div>
                 <div class="mh3 mb2">
-                    <button type="submit" class="uppercase ph5 w80">Login</button>
+                    <button type="submit" class="btn btn-primary ph5 w80">Iniciar sesión</button>
                 </div>
                 <div class="mb3">
                     <input type="checkbox" class="" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                    Remember Me
+                    Recordar usuario
                 </div>
 
                 <div>
-                    <a class="btn btn-link" href="{{ route('password.request') }}"> Forgot Your Password? </a>
+                    <a class="btn btn-link" href="{{ route('password.request') }}"> ¿Olvidaste tu contraseña? </a>
                 </div>
             </form>
+
     </div>
 @endsection

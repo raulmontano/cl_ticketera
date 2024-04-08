@@ -5,7 +5,7 @@
 body{
 		/*background-color: #f7f7f7;*/
 		background-color: #FFF;
-
+		font-size: 0.8rem;
 }
 
 :root {
@@ -633,27 +633,6 @@ textarea{
 	border:solid 1px #b3ccdb;
 }
 
-th{
-	border-collapse: collapse;
-	border:solid 1px #cbdefe;
-	padding: 5px;
-	text-transform: uppercase;
-	font-size: 13px;
-	text-align: left;
-	/*color: #6a92ab;*/
-	color:#1a73e8;
-
-}
-
-td{
-	/*
-	border-collapse: collapse;
-	border:solid 1px #cbdefe;
-	padding: 5px;
-	text-align: left;
-	font-size: 13px;
-	color:#000;*/
-}
 .td-gestion{
 
 	padding: 5px;
