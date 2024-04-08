@@ -16,9 +16,11 @@ class Attachment extends BaseModel
     {
         $files = $request->file('attachment');
 
+        $class = (new \ReflectionClass($attachable))->getShortName();
+
         foreach ($files as $file) {
-            $path = str_replace(' ', '_', $attachable->id.'_'.$file->getClientOriginalName());
-            Storage::putFileAs('public/attachments/', $file, $path);
+            $path = str_replace(' ', '_', $file->getClientOriginalName());
+            Storage::putFileAs(strtolower($class) . '_'.$attachable->id . '/', $file, $path);
             $attachable->attachments()->create(['path' => $path]);
         }
     }
