@@ -21,6 +21,6 @@ class TicketsAssignController extends Controller
             }
         }
 
-        return redirect()->route('tickets.index');
+        return redirect()->route('tickets.show',$ticket);
     }
 }

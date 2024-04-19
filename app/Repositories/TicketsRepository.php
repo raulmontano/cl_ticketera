@@ -51,11 +51,7 @@ class TicketsRepository
 
     public function solved()
     {
-        if (auth()->user()->admin) {
-            return Ticket::where('status', '=', Ticket::STATUS_SOLVED);
-        }
-
-        return auth()->user()->teamsTickets()->where('status', '=', Ticket::STATUS_SOLVED);
+        return Ticket::where('status', '=', Ticket::STATUS_SOLVED);
     }
 
     public function closed()

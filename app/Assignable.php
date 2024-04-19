@@ -14,7 +14,10 @@ trait Assignable
         }
         $this->user()->associate($user)->save();
         $user->notify($this->getAssignedNotification());
-        TicketEvent::make($this, trans('notification.events.assignedTo')." : {$user->name}");
+
+        $event = TicketEvent::make($this, trans('notification.events.assignedTo').": {$user->name}");
+        $event->assigned_to_user_id = $user->id;
+        $event->save();
     }
 
     public function assignToTeam($team)
@@ -27,6 +30,9 @@ trait Assignable
         }
         $this->team()->associate($team)->save();
         $team->notify($this->getAssignedNotification());
-        TicketEvent::make($this, trans('notification.events.assignedToTeam')." : {$team->name}");
+        
+        $event = TicketEvent::make($this, trans('notification.events.assignedToTeam')." : {$team->name}");
+        $event->assigned_to_team_id = $team->id;
+        $event->save();
     }
 }

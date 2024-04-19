@@ -5,15 +5,15 @@ namespace App\ThrustHelpers\Filters;
 use BadChoice\Thrust\Filters\TextFilter;
 use Illuminate\Http\Request;
 
-class TitleFilter extends TextFilter
+class ReferenceNumberFilter extends TextFilter
 {
     public function apply(Request $request, $query, $value)
     {
-        return $query->where('title', 'like', "%{$value}%");
+        return $query->whereRaw("DATE_FORMAT(tickets.created_at,'%Y%m%d_%H%i') like '%{$value}%'");
     }
 
     public function getTitle()
     {
-        return trans('ticket.subject');
+        return trans('ticket.reference_number');
     }
 }

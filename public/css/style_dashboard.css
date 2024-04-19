@@ -756,3 +756,11 @@ textarea{
 .nav-content .tabs{
 		background-color: var(--color-secondary) !important
 }
+
+#content_tickets .thrust-table input[type="checkbox"]{
+	display: none !important;
+}
+
+#filtersForm li.text-left {
+	margin-bottom: 25px;
+}

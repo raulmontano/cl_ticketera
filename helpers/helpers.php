@@ -2,14 +2,14 @@
 
 use Carbon\Carbon;
 
-function createSelectArray($array, $withNull = false)
+function createSelectArray($array, $withNull = false, $nullOption = '--')
 {
     if (! $array) {
         return [];
     }
     $values = $array->pluck('name', 'id')->toArray();
     if ($withNull) {
-        return ['' => '--'] + $values;
+        return ['' => $nullOption] + $values;
     }
 
     return $values;

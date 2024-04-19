@@ -6,6 +6,11 @@
         <div class="col-md-6">
 
           <div class="row">
+            <b>{{ __('ticket.reference_number')}}:&nbsp;</b>
+              {{  $ticket->reference_number }}
+          </div>
+
+          <div class="row">
             <b>{{ __('ticket.type')}}:&nbsp;</b>
               {{  $ticket->type->name }} {{  $ticket->postType->name }} {{  $ticket->company->name }}
           </div>
@@ -54,6 +59,26 @@
 @endphp
 
 <div class="comment new-ticket">
+
+  <div class="form-row justify-content-md-center">
+    <div class="form-group col-md-6">
+
+      <div class="form-row">
+        <label for="title">{{ __('ticket.subject') }}</label>
+        <input name="title" id="title" class="form-control" required value="{{ old('title') ? old('title') : $title}}"/>
+      </div>
+
+      <div class="form-row">
+        <label for="body">{{ __('ticket.body') }}</label>
+        <textarea  name="body" class="w100" required>{{ old('body') ? old('body') : $body }}</textarea>
+      </div>
+
+      <div class="form-row">
+        @include('components.uploadAttachment', ["type" => "tickets"])
+      </div>
+
+    </div>
+  </div>
 
   <div class="form-row justify-content-md-center">
       <div class="form-group col-md-3">
@@ -119,23 +144,9 @@
     </div>
 
     <div class="form-row justify-content-md-center">
-      <div class="form-group col-md-6">
+      <div class="form-group col-md-12">
 
-        <div class="form-row">
-          <label for="title">{{ __('ticket.subject') }}</label>
-          <input name="title" id="title" class="form-control" required value="{{ old('title') ? old('title') : $title}}"/>
-        </div>
-
-        <div class="form-row">
-          <label for="body">{{ __('ticket.body') }}</label>
-          <textarea  name="body" class="w100" required>{{ old('body') ? old('body') : $body }}</textarea>
-        </div>
-
-        <div class="form-row">
-          @include('components.uploadAttachment', ["type" => "tickets"])
-        </div>
-
-        <div class="form-row">
+        <div class="form-row float-right">
           <button class="ph3 ml1 btn btn-primary">{{ __('ticket.update') }}</button>
           <button class="ph3 ml1 btn btn-secondary" onClick="$('#edit-ticket-button').show(); $('#ticket-info').show(); $('#ticket-edit').hide(); return false;">{{ __('ticket.cancel') }}</button>
         </div>

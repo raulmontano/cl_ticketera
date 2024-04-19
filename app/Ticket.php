@@ -55,6 +55,8 @@ class Ticket extends BaseModel
     public const PRIORITY_HIGH      = 3; //COMUNICAR=SI
     public const PRIORITY_BLOCKER   = 4;
 
+    protected $append = ['user_mc'];
+
     public static function createAndNotify($requester, $title, $body, $channels, $categories, $type, $company, $post_type)
     {
         $requester = Requester::findOrCreate($requester['name'] ?? 'Unknown', $requester['email'] ?? null);
@@ -65,12 +67,13 @@ class Ticket extends BaseModel
             'ticket_company_id'         => $company,
             'ticket_post_type_id'         => $post_type,
             'public_token' => Str::random(24),
-            'team_id'      => Settings::defaultTeamId(),
             'priority' => self::PRIORITY_LOW,
         ]);
 
         $ticket->attachTags($channels); //channels
         $ticket->attachCategories($categories); //categories
+
+        $ticket->assignToTeam(Settings::defaultTeamId()); //editores
 
         tap(new TicketCreated($ticket), function ($newTicketNotification) use ($ticket) {
             Admin::notifyAll($newTicketNotification);
@@ -78,6 +81,8 @@ class Ticket extends BaseModel
                 $ticket->team->notify($newTicketNotification);
             }
         });
+
+
 
         return $ticket;
     }
@@ -112,6 +117,39 @@ class Ticket extends BaseModel
         return self::where('public_token', $public_token)->firstOrFail();
     }
 
+    public function getUserMcAttribute(){
+      return $this->events()
+                ->select('users.name','users.id','users.email')
+                ->join('users', 'users.id','ticket_events.assigned_to_user_id' )
+                ->join('memberships', function ($join) {
+                    $join->on('memberships.user_id', '=', 'ticket_events.user_id');
+                    $join->on('memberships.team_id', \DB::raw(2));
+                  })
+                ->whereNotNull('assigned_to_user_id')
+                ->orderBy('ticket_events.id','DESC')
+                ->first();
+    }
+
+    public function getTimeInMcAttribute(){
+      return $this->events()
+                ->select('ticket_events.created_at')
+                ->where('ticket_events.assigned_to_team_id',\DB::raw(2)) //MC
+                ->orderBy('ticket_events.id','DESC')
+                ->get();
+    }
+
+    public function getTimeInEditorAttribute(){
+      return $this->events()
+                ->select('ticket_events.created_at')
+                ->where('ticket_events.assigned_to_team_id',\DB::raw(1)) //EDITORES
+                ->orderBy('ticket_events.id','DESC')
+                ->get();
+    }
+
+    public function getReferenceNumberAttribute(){
+      return $this->created_at->format('Ymd_Hi');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -144,7 +182,7 @@ class Ticket extends BaseModel
 
     public function events()
     {
-        return $this->hasMany(TicketEvent::class)->latest();
+        return $this->hasMany(TicketEvent::class)->latest('ticket_events.created_at');
     }
 
     public function tags()
@@ -316,7 +354,28 @@ class Ticket extends BaseModel
 
     public function canBeEdited()
     {
-        return ! in_array($this->status, [self::STATUS_CLOSED, self::STATUS_MERGED]);
+
+      $user = auth()->user();
+
+        $isTeamMc = $isAdmin = false;
+
+      if($user->admin){
+        $isAdmin = true;
+      } else {
+
+        $userTeam = $user->teams()->first();
+
+        if($userTeam){
+          if($userTeam->id == 2){
+              $isTeamMc = true;
+          }
+        }
+
+      }
+
+      return ! in_array($this->status, [self::STATUS_SOLVED,self::STATUS_CLOSED, self::STATUS_MERGED])
+              && ( $isAdmin || $isTeamMc );
+
     }
 
     public static function statusNameFor($status)

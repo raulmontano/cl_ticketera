@@ -3,7 +3,31 @@
         <span class="fs3 white" onclick="toggleSidebar()">X</span>
     </div>
     <img src="{{ url("/images/logo_grey.png") }}">
-    @include('layouts.sidebar.tickets')
+
+    @if($team = auth()->user()->teams()->first())
+      @if($team->id == 1)
+        @include('layouts.sidebar.tickets_editores')
+      @elseif($team->id == 2)
+        @include('layouts.sidebar.tickets_mejora')
+      @endif
+    @else
+      @include('layouts.sidebar.tickets')
+    @endif
+
+    <h4>Archivos</h4>
+    <ul>
+      @include('components.sidebarItem', ["url" => route('ticket_attachments.index') . "?default=true",          "title" =>  'Buscador de archivos'])
+    </ul>
+
+    @if($team = auth()->user()->teams()->first())
+    <h4>Equipo {{$team->name}}</h4>
+    <ul>
+      <li>
+        <div class="hidden" id="register-link2-{{$team->id}}"> {{ route('register') }}?team_token={{$team->token}}&team_name={{$team->name}} </div>
+        <a href="#" onclick="copyToClipboard('#register-link2-{{$team->id}}')">@icon(clipboard) Copiar link de registro</a>
+      </li>
+    </ul>
+    @endif
 
     @if (auth()->user()->can_see_reports)
     <h4> @icon(bar-chart) {{ trans_choice('report.report', 2) }}</h4>

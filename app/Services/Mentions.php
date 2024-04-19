@@ -6,6 +6,24 @@ use App\User;
 
 class Mentions
 {
+
+  public static function arrayForTicket($ticket)
+  {
+      //$users = auth()->user()->admin ? User::all() : $user->teamsMembers()->get();
+
+      if($ticket->user){
+          $users = collect($ticket->user);
+      }
+
+      return $users->map(function ($user) {
+          return [
+              'username' => strtolower(str_replace(@' ', @'_', $user->name)),
+              'name'     => $user->name,
+              'image'    => gravatarUrl($user->email, 20),
+          ];
+      });
+  }
+
     public static function arrayFor($user)
     {
         $users = auth()->user()->admin ? User::all() : $user->teamsMembers()->get();

@@ -4,12 +4,12 @@
 
       <div class="form-row">
         <label for="title">{{ __('ticket.subject') }}</label>
-        <input name="title" id="title" class="form-control" required value="{{ old('title') ? old('title') : (isset($title) ? $title : '' )}}"/>
+        <input name="title" id="title" class="form-control" required value="{{ old('title') ? old('title') : (request()->has('title') ? request()->get('title') : '' )}}"/>
       </div>
 
       <div class="form-row">
         <label for="body">{{ __('ticket.body') }}</label>
-        <textarea  name="body" class="w100" required>{{ old('body') ? old('body') : (isset($body) ? $body : '' )}}</textarea>
+        <textarea  name="body" class="w100" required>{{ old('body') ? old('body') : (request()->has('body') ? request()->get('body') : '' )}}</textarea>
       </div>
     </div>
   </div>

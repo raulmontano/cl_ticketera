@@ -31,10 +31,14 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
     Route::put('profile', 'ProfileController@update')->name('profile.update');
     Route::post('password', 'ProfileController@password')->name('profile.password');
 
+    Route::get('tickets/export', 'TicketExporterController@export')->name('tickets.export');
     Route::get('tickets/merge', 'TicketsMergeController@index')->name('tickets.merge.index');
     //Route::post('tickets/merge', 'TicketsMergeController@store')->name('tickets.merge.store');
     Route::get('tickets/search/{text}', 'TicketsSearchController@index')->name('tickets.search');
-    Route::resource('tickets', 'TicketsController', ['except' => ['edit', 'destroy']]);
+    Route::resource('tickets', 'TicketsController', ['except' => ['edit', 'destroy','export']]);
+
+
+
     Route::post('tickets/{ticket}/assign', 'TicketsAssignController@store')->name('tickets.assign');
     Route::post('tickets/{ticket}/comments', 'CommentsController@store')->name('comments.store');
     Route::resource('tickets/{ticket}/tags', 'TicketsTagsController', ['only' => ['store', 'destroy'], 'as' => 'tickets']);
@@ -55,7 +59,8 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
     Route::resource('leads/{lead}/tags', 'LeadTagsController', ['only' => ['store', 'destroy'], 'as' => 'leads']);
     Route::resource('leads/{lead}/tasks', 'LeadTasksController', ['only' => ['index', 'store', 'update', 'destroy'], 'as' => 'leads']);
 
-    Route::get('storage/attachments/{filename}', 'AttachmentsController@show')->name('attachments');
+    Route::resource('ticket_attachments', 'TicketAttachmentsController');
+    Route::get('attachments/{attachment}', 'AttachmentsController@show')->name('attachments');
     Route::resource('tasks', 'TasksController', ['only' => ['index', 'update', 'destroy']]);
 
     Route::resource('teams', 'TeamsController');

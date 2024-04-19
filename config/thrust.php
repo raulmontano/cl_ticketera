@@ -7,4 +7,5 @@ return [
     'routeMiddleware'                => ['web', 'auth'],
     'indexLayout'                    => 'layouts.app',
     'popupId'                        => '#popup',
+    'minSearchChars'=> 1,
 ];

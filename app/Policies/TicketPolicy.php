@@ -34,6 +34,9 @@ class TicketPolicy
     public function view(User $user, Ticket $ticket)
     {
         //FIXME mejora continua puede ver y editar pero no puede cambiar de estatus
+
+        return true;
+
         return  $ticket->user_id == $user->id ||
                 $user->teamsTickets()->pluck('id')->contains($ticket->id) ||
                 ($user->assistant && $ticket->isEscalated());
@@ -88,8 +91,20 @@ class TicketPolicy
         return false;
     }
 
+    public function assignToUser(User $user, Ticket $ticket)
+    {
+      return $user->admin || $user->teamsTickets()->pluck('id')->contains($ticket->id);
+    }
+
+    public function updateStatus(User $user, Ticket $ticket)
+    {
+      //update status only when ticket is assigned to someone
+      return $ticket->user_id && ($user->admin || $user->teamsTickets()->pluck('id')->contains($ticket->id));
+    }
+
     public function assignToTeam(User $user, Ticket $ticket)
     {
+      return $user->admin;
     }
 
     public function createIssue(User $user, Ticket $ticket)

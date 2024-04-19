@@ -16,10 +16,13 @@ class PriorityFilter extends SelectFilter
     public function options()
     {
         return [
-            ucfirst(Ticket::priorityNameFor(Ticket::PRIORITY_LOW))     => Ticket::PRIORITY_LOW,
-            ucfirst(Ticket::priorityNameFor(Ticket::PRIORITY_NORMAL))  => Ticket::PRIORITY_NORMAL,
-            ucfirst(Ticket::priorityNameFor(Ticket::PRIORITY_HIGH))    => Ticket::PRIORITY_HIGH,
-            ucfirst(Ticket::priorityNameFor(Ticket::PRIORITY_BLOCKER)) => Ticket::PRIORITY_BLOCKER,
+            __("ticket.low")     => Ticket::PRIORITY_LOW,
+            __("ticket.high")    => Ticket::PRIORITY_HIGH,
         ];
     }
+
+    public function getTitle()
+    {
+        return __('ticket.priority');
+      }
 }

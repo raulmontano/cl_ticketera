@@ -15,6 +15,10 @@
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script type="text/javascript">
+      var lang= '{{ app()->getLocale() }}';
+    </script>
 </head>
 <body>
     <div id="app">
@@ -24,7 +28,7 @@
 {{--        @include('layouts.header')--}}
         @include('layouts.tinyHeader')
         @include('layouts.sidebar')
-        <div class="content">
+        <div class="content" @if(isset($resourceName)) id="content_{{ $resourceName }}" @endif>
             @include('components.errors')
             @yield('content')
         </div>

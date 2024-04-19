@@ -6,9 +6,16 @@ use App\Idea;
 use App\Rules\ValidRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Attachment;
+use BadChoice\Thrust\Controllers\ThrustController;
 
 class AttachmentsController extends Controller
 {
+
+  public function index()
+  {
+      return (new ThrustController())->index('files');
+  }
+
     public function show(Attachment $attachment)
     {
 
@@ -18,4 +25,5 @@ class AttachmentsController extends Controller
 
         return Storage::download("$basepath/{$attachment->path}");
     }
+
 }

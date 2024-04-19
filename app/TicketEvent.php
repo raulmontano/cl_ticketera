@@ -7,10 +7,13 @@ class TicketEvent extends BaseModel
     public static function make($ticket, $description)
     {
         if ($ticket instanceof Ticket) {
-            $ticket->events()->create([
+
+            $data = [
                 'user_id' => auth()->user()->id ?? null,
                 'body'    => $description,
-            ]);
+            ];
+
+            return $ticket->events()->create($data);
         }
     }
 

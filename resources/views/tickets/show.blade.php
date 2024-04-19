@@ -6,7 +6,7 @@
         </div>
         <div class="card">
           <h3 class="card-header">
-            #{{ $ticket->id }}. {{ $ticket->title }} <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} · <b>{{ $ticket->created_at->diffForHumans() }}</b></div>
+            {{ $ticket->title }} <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} (<b>{{ $ticket->created_at->diffForHumans() }})</b></div>
           </h3>
             <div class="card-body">
               <p class="card-text">{!! nl2br($ticket->body) !!}</p>
@@ -28,23 +28,21 @@
         </div>
     </div>
 
-
-    @if( $ticket->canBeEdited() )
     <div class="description">
-        @if(!$ticket->user)
+
+        @can("assignToUser", $ticket)
         <div class="actions card mb-3">
           @include('components.assignActions', ["endpoint" => "tickets", "object" => $ticket])
         </div>
-        @endif
+        @endcan
 
         <div class="actions card">
             {{ Form::open(["url" => route("comments.store", $ticket) , "files" => true, "id" => "comment-form"]) }}
 
-
             <table class="w80 no-padding">
 
                 <tr>
-
+                  @can("updateStatus", $ticket)
                   <td class="p2">
                       <select id="new_status" name="new_status">
                           @if($ticket->team->id == 2)
@@ -63,12 +61,16 @@
 
                       </select>
                   </td>
-
+                  @endcan
                 <td class="w10 p2">
                   <textarea id="comment-text-area" cols="40" rows="3" placeholder="Mensaje (opcional)" name="body" cols="20">@if(auth()->user()->settings->tickets_signature)&#13;&#13;{{ auth()->user()->settings->tickets_signature }}@endif</textarea>
                 </td>
             <td >
+              @can("updateStatus", $ticket)
                   <button class="ph3 ml1 btn btn-primary">{{ __('ticket.update') }} {{ __('ticket.status')}}</button>
+                  @else
+                  <button class="ph3 ml1 btn btn-primary">Enviar mensaje</button>
+                  @endcan
             </td>
 
           </tr>
@@ -78,24 +80,7 @@
             {{ Form::close() }}
         </div>
       </div>
-    @endif
+
 
     @include('components.ticketComments', ["comments" => $ticket->commentsAndNotesAndEvents()->sortBy('created_at')->reverse() ])
-@endsection
-
-
-@section('scripts')
-
-    <script>
-
-        $("#comment-text-area").mention({
-            delimiter: '@',
-            emptyQuery: true,
-            typeaheadOpts: {
-                items: 10 // Max number of items you want to show
-            },
-            users: {!! json_encode(App\Services\Mentions::arrayFor(auth()->user())) !!}
-        });
-
-    </script>
 @endsection

@@ -31,7 +31,7 @@ class TicketsIndexQuery
         } else {
             $tickets = $repository->all();
         }
-
+        
         $tickets = (new TicketFilters())->apply($tickets, request()->all());
 
         if (request('team')) {

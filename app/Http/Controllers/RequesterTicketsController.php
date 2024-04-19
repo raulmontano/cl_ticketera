@@ -28,26 +28,8 @@ class RequesterTicketsController extends Controller
 
     public function create()
     {
-        $params = [];
 
-        if (request()->nombre) {
-            $params['name'] = request()->nombre;
-        }
-
-        if (request()->email) {
-            $params['email'] = request()->email;
-        }
-
-        if (request()->title) {
-            $params['title'] = request()->title;
-        }
-
-        if (request()->body) {
-            $params['body'] = request()->body;
-        }
-
-
-        return view('requester.tickets.create', $params);
+        return view('requester.tickets.create');
     }
 
     public function store()
