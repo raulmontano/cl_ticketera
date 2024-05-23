@@ -15,6 +15,7 @@
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
     <script type="text/javascript">
       var lang= '{{ app()->getLocale() }}';
@@ -37,8 +38,16 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     @yield('scripts')
     @stack('edit-scripts')
+
+    <script>
+    $( function() {
+      $( document ).tooltip();
+    } );
+    </script>
 
 </body>
 </html>

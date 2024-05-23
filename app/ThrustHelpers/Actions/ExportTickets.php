@@ -17,7 +17,7 @@ class ExportTickets extends Export
         $title = $this->getTitle();
         $link  = route('tickets.export',request()->query());
 
-        return "<a class='button btn btn-secondary' href='{$link}'> <i class='fa fa-download'></i> {$title} </a>";
+        return "<a class='button btn btn-secondary float-right' href='{$link}'> <i class='fa fa-download'></i> {$title} </a>";
     }
 
     public function getTitle()

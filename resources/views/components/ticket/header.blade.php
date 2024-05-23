@@ -35,6 +35,16 @@
             <b>{{ __('ticket.status')}}:&nbsp;</b>
             {{ __("ticket." . $ticket->statusName() ) }}
           </div>
+
+          <div class="row">
+            @if($ticket->start_date)
+              {{ __('ticket.start_date')}} {{  $ticket->start_date }}
+            @endif
+
+            @if($ticket->end_date)
+            {{ __('ticket.end_date')}} {{  $ticket->end_date }}
+            @endif
+          </div>
         </div>
         <div class="col-md-12">
           @include('components.attachments', ["attachments" => $ticket->attachments])
@@ -81,6 +91,24 @@
   </div>
 
   <div class="form-row justify-content-md-center">
+    <div class="form-group col-md-3">
+
+      <div class="form-row mr-2">
+        <label for="start_date">{{ __('ticket.start_date') }}</label>
+        <input type="date" name="start_date" class="form-control" value="{{ old('start_date') ? old('start_date') : $ticket->start_date}}">
+      </div>
+    </div>
+
+    <div class="form-group col-md-3">
+
+      <div class="form-row">
+        <label for="end_date">{{ __('ticket.end_date') }}</label>
+        <input type="date" name="end_date" class="form-control" value="{{ old('end_date') ? old('end_date') : $ticket->end_date}}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row justify-content-md-center">
       <div class="form-group col-md-3">
         <label for="channels">{{ trans_choice('ticket.channels', 1)}}</label>
         @foreach(\App\Channel::all() as $i => $channel)
@@ -89,6 +117,12 @@
              <label class="form-check-label check" for="channel_{{ $channel->id }}">
                {{ $channel->name }}
             </label>
+
+            @if(strtolower($channel->name) == 'call center')
+            <span data-toggle="tooltip" data-placement="top" title="Canales Digitales, Sucursal Virtual, Redes Sociales.">
+              <i type="button" class="fa fa-info"></i>
+            <span>
+            @endif
         </div>
         @endforeach
       </div>
@@ -127,7 +161,6 @@
                 <option value="{{$postType->id}}" @if($ticket->postType && $postType->id == $ticket->postType->id) selected @endif>{{ $postType->name }}</option>
             @endforeach
         </select>
-
 
         <div class="form-row">
           <label for="priority">{{ __('ticket.priority')}}</label>

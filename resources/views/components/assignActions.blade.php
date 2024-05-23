@@ -9,7 +9,11 @@
             @else
                 @if ($object->team)
                     <td>{{ __('ticket.editor') }}:</td>
-                    <td>{{ Form::select('user_id', createSelectArray( $object->team->members, true,'-- Sin asignación --'), $object->user_id, ['class' => 'w100']) }}</td>
+                    @if($object->user_id)
+                      <td>{{ Form::select('user_id', createSelectArray( $object->team->members), $object->user_id, ['class' => 'w100']) }}</td>
+                    @else
+                      <td>{{ Form::select('user_id', createSelectArray( $object->team->members, true,'-- Sin asignación --'), $object->user_id, ['class' => 'w100']) }}</td>
+                    @endif
                 @endif
             @endcan
 

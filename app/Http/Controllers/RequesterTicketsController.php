@@ -60,6 +60,8 @@ class RequesterTicketsController extends Controller
             request('type'),
             request('company'),
             request('post_type'),
+            request('start_date'),
+            request('end_date'),
         );
 
         //create

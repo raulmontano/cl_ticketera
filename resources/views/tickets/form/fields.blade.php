@@ -12,17 +12,47 @@
         <textarea  name="body" class="w100" required>{{ old('body') ? old('body') : (request()->has('body') ? request()->get('body') : '' )}}</textarea>
       </div>
     </div>
+
+  </div>
+
+  <div class="form-row justify-content-md-center">
+    <div class="form-group col-md-3">
+
+      <div class="form-row mr-2">
+        <label for="start_date">{{ __('ticket.start_date') }}</label>
+        <input type="date" name="start_date" class="form-control" value="{{ old('start_date') ? old('start_date') : (request()->has('start_date') ? request()->get('start_date') : '' )}}">
+      </div>
+    </div>
+
+    <div class="form-group col-md-3">
+
+      <div class="form-row">
+        <label for="end_date">{{ __('ticket.end_date') }}</label>
+        <input type="date" name="end_date" class="form-control" value="{{ old('end_date') ? old('end_date') : (request()->has('end_date') ? request()->get('end_date') : '' )}}">
+      </div>
+    </div>
   </div>
 
     <div class="form-row justify-content-md-center">
         <div class="form-group col-md-3">
           <label for="channels">{{ trans_choice('ticket.channels', 1)}}</label>
+
+          <input name="channels[]" id="channel_99" type="hidden" class="form-check-input" value="Solicitante de Contenido">
+
           @foreach(\App\Channel::all() as $i => $channel)
           <div class="form-check">
-              <input name="channels[]" id="channel_{{ $channel->id }}" type="checkbox" @if( (!old('channels') && $i== 0) || (old('channels') && in_array($channel->name,old('channels')))) checked @endif class="form-check-input" value="{{ $channel->name }}" />
-               <label class="form-check-label check" for="channel_{{ $channel->id }}">
+              <input name="channels[]" id="channel_{{ $channel->id }}" type="checkbox" @if( (old('channels') && in_array($channel->name,old('channels')))) checked @endif class="form-check-input" value="{{ $channel->name }}" />
+
+              <label class="form-check-label check" for="channel_{{ $channel->id }}">
                  {{ $channel->name }}
               </label>
+
+              @if(strtolower($channel->name) == 'call center')
+              <span data-toggle="tooltip" data-placement="top" title="Canales Digitales, Sucursal Virtual, Redes Sociales.">
+                <i type="button" class="fa fa-info"></i>
+              <span>
+              @endif
+
           </div>
           @endforeach
         </div>

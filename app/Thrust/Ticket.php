@@ -162,12 +162,6 @@ class Ticket extends Resource
     public function actions()
     {
         return [];
-
-        return [
-            new MergeTickets(),
-            new ChangeStatus(),
-            new ChangePriority(),
-        ];
     }
 
     public function filters()

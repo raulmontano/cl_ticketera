@@ -19,23 +19,36 @@ class TicketAttachment extends Resource
 
     public function fields()
     {
-        return [
+        $fields = [
+            Text::make('attachments.id', 'Solicitud')->displayWith(function ($attachment) {
+              return '<a href="'.route('tickets.show',$attachment->attachable_id).'">'.$attachment->attachable->reference_number . ' - '. $attachment->attachable->title.'</a>';
+            }),
+
             Text::make('attachments.created_at', __('ticket.created_at'))->displayWith(function ($attachment) {
                 return $attachment->created_at->format('Ymd_Hi');
             }),
             Text::make('path','Documento'),
 
-            Text::make('attachments.id', 'Solicitud')->displayWith(function ($attachment) {
-                return '<a href="'.route('tickets.show',$attachment->attachable_id).'">'.$attachment->attachable->reference_number . ' - '. $attachment->attachable->title.'</a>';
-            }),
-
             Link::make('attachments.id','')->displayCallback(function ($attachment) {
                 return '<i class="fa fa-download"></i>';
             })->route('attachments'),
 
-            Delete::make('delete')
-
         ];
+
+        $isEditor = false;
+
+        if(auth()->user()->teams()->count()){
+          //
+          $isEditor = (auth()->user()->teams()->first()->id == 1);
+        } else {
+          //
+        }
+
+        if($isEditor){
+          $fields[] = Delete::make('delete');
+        }
+
+        return $fields;
     }
 
     public function getFields()

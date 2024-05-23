@@ -40,7 +40,9 @@ a:active {
   color: #fff;
 }*/
 
-
+td{
+	padding-right: 5px;
+}
 
 .title-combo-cliente{
 	width: 200px;
@@ -763,4 +765,14 @@ textarea{
 
 #filtersForm li.text-left {
 	margin-bottom: 25px;
+}
+
+.actions{
+	padding-top: 0px;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+.thrust-actions{
+margin-top: 5px;
 }

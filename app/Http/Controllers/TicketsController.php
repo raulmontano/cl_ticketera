@@ -67,6 +67,8 @@ class TicketsController extends Controller
             request('type'),
             request('company'),
             request('post_type'),
+            request('start_date'),
+            request('end_date'),
         );
 
         //FIXME
@@ -121,6 +123,8 @@ class TicketsController extends Controller
             request('company'),
             request('post_type'),
             request('priority'),
+            request('start_date'),
+            request('end_date'),
         );
 
         if ($ticket && request()->hasFile('attachment')) {

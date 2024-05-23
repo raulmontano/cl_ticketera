@@ -5,7 +5,7 @@ return [
     'ticket'     => 'Solicitud|Solicitudes',
     'assigned'   => 'Cliente asignado',
 
-    'editor'   => 'Formador asignado',
+    'editor'   => 'Gestor asignado',
 
     'myTickets'  => 'Mis Solicitudes',
     'newTicket'  => 'Crear Solicitud',
@@ -81,4 +81,7 @@ return [
     'ticketPostType'         => 'Tipos de publicación',
     'ticketCompany'         => 'Catálogo de operación',
     'needSubject'        => 'Asunto requerido',
+
+    'start_date' => 'Desde',
+    'end_date' => 'Hasta',
 ];

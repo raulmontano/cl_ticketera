@@ -57,8 +57,9 @@ class Ticket extends BaseModel
 
     protected $append = ['user_mc'];
 
-    public static function createAndNotify($requester, $title, $body, $channels, $categories, $type, $company, $post_type)
+    public static function createAndNotify($requester, $title, $body, $channels, $categories, $type, $company, $post_type, $start_date,$end_date)
     {
+
         $requester = Requester::findOrCreate($requester['name'] ?? 'Unknown', $requester['email'] ?? null);
         $ticket    = $requester->tickets()->create([
             'title'        => substr($title, 0, 190),
@@ -66,6 +67,8 @@ class Ticket extends BaseModel
             'ticket_type_id'         => $type,
             'ticket_company_id'         => $company,
             'ticket_post_type_id'         => $post_type,
+            //'start_date' => $start_date,
+            //'end_date'=> $end_date,
             'public_token' => Str::random(24),
             'priority' => self::PRIORITY_LOW,
         ]);
@@ -87,7 +90,7 @@ class Ticket extends BaseModel
         return $ticket;
     }
 
-    public function updateWith($title, $body, $channels, $categories, $type, $company, $post_type, $priority)
+    public function updateWith($title, $body, $channels, $categories, $type, $company, $post_type, $priority, $start_date, $end_date)
     {
         $this->update([
           'title'        => substr($title, 0, 190),
@@ -96,6 +99,8 @@ class Ticket extends BaseModel
           'ticket_company_id'         => $company,
           'ticket_post_type_id'         => $post_type,
           'priority' => $priority,
+          //'start_date' => $start_date,
+          //'end_date'=> $end_date,
         ]);
 
         $this->syncTags($channels); //channels
