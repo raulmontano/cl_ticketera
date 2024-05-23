@@ -776,3 +776,11 @@ textarea{
 .thrust-actions{
 margin-top: 5px;
 }
+
+.sidebar img.logo {
+	margin-left: 30%;
+}
+
+#errors ul {
+	margin-bottom: 0px;
+}

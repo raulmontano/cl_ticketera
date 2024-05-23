@@ -20,14 +20,14 @@ class TicketAttachment extends Resource
     public function fields()
     {
         $fields = [
-            Text::make('attachments.id', 'Solicitud')->displayWith(function ($attachment) {
-              return '<a href="'.route('tickets.show',$attachment->attachable_id).'">'.$attachment->attachable->reference_number . ' - '. $attachment->attachable->title.'</a>';
-            }),
-
             Text::make('attachments.created_at', __('ticket.created_at'))->displayWith(function ($attachment) {
-                return $attachment->created_at->format('Ymd_Hi');
+                return $attachment->created_at->format('Y-m-d H:i:s');
             }),
             Text::make('path','Documento'),
+
+            Text::make('attachments.id','Agregado por')->displayWith(function ($attachment) {
+                return $attachment->causer ? $attachment->causer->name . ' ('.$attachment->causer->email.')' : '';
+            }),
 
             Link::make('attachments.id','')->displayCallback(function ($attachment) {
                 return '<i class="fa fa-download"></i>';

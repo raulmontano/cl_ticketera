@@ -10,19 +10,31 @@ class StatusFilter extends SelectFilter
 {
     public function apply(Request $request, $query, $value)
     {
-        return $query->where('status', $value);
+
+        $query->where('status', $value);
+
+        return $query;
     }
 
     public function options()
     {
-        return [
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_NEW))     => Ticket::STATUS_NEW,
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_OPEN))    => Ticket::STATUS_OPEN,
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_PENDING)) => Ticket::STATUS_PENDING,
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_SOLVED))  => Ticket::STATUS_SOLVED,
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_CLOSED))  => Ticket::STATUS_CLOSED,
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_MERGED))  => Ticket::STATUS_MERGED,
-            ucfirst(Ticket::statusNameFor(Ticket::STATUS_SPAM))    => Ticket::STATUS_SPAM,
+
+
+        $options = [
+
+            ucfirst(__("ticket.new" ))     => Ticket::STATUS_NEW,
+            ucfirst(__("ticket.open" ))    => Ticket::STATUS_OPEN,
+            ucfirst(__("ticket.pending" ))    => Ticket::STATUS_PENDING,
+            ucfirst(__("ticket.solved" ))    => Ticket::STATUS_SOLVED,
+            ucfirst(__("ticket.closed" ))    => Ticket::STATUS_CLOSED,
+            ucfirst(__("ticket.spam" ))    => Ticket::STATUS_SPAM,
+            ucfirst(__("ticket.paused" ))    => Ticket::STATUS_PAUSED,
+            ucfirst(__("ticket.error" ))    => Ticket::STATUS_ERROR,
+
         ];
+
+
+
+        return $options;
     }
 }

@@ -14,8 +14,9 @@
     <link href="{{ asset('css/all.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/jquery-ui.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/toastr.css') }}" rel="stylesheet">
 
     <script type="text/javascript">
       var lang= '{{ app()->getLocale() }}';
@@ -38,8 +39,9 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="{{ asset('js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('js/popper.min.js') }}"></script>
+    <script src="{{ asset('js/toastr.min.js') }}"></script>
     @yield('scripts')
     @stack('edit-scripts')
 
@@ -47,6 +49,40 @@
     $( function() {
       $( document ).tooltip();
     } );
+    </script>
+
+    <script>
+        @if (Session::has('message'))
+            var type = "{{ Session::get('alert-type', 'info') }}"
+            switch (type) {
+                case 'info':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.info("{{ Session::get('message') }}");
+
+                    break;
+                case 'success':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.success("{{ Session::get('message') }}");
+
+                    break;
+                case 'warning':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.warning("{{ Session::get('message') }}");
+
+
+                    break;
+                case 'error':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.error("{{ Session::get('message') }}");
+
+
+                    break;
+            }
+        @endif
     </script>
 
 </body>

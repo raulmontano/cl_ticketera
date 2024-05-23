@@ -11,17 +11,20 @@ class CommentsController extends Controller
     {
         $this->authorize('view', $ticket);
 
-        //if (request('private')) {
-        if(request('new_status')){
-            $comment = $ticket->addComment(auth()->user(), request('body'), request('new_status'));
+        if (request('body') || request('new_status')) {
+            if (request('public') || request('new_status')) {
+                $comment = $ticket->addComment(auth()->user(), request('body'), request('new_status'));
+            } else {
+                $comment = $ticket->addNote(auth()->user(), request('body'));
+            }
         } else {
-            $comment = $ticket->addNote(auth()->user(), request('body'));
+            //nothing
         }
 
         if ($comment && request()->hasFile('attachment')) {
             Attachment::storeAttachmentFromRequest(request(), $comment);
         }
 
-        return redirect()->route('tickets.show',$ticket);
+        return redirect()->route('tickets.show', $ticket)->withMessage('Mensaje agregado');
     }
 }

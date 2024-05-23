@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Requester;
 
 class TicketCreated extends Notification implements ShouldQueue
 {
@@ -28,10 +29,12 @@ class TicketCreated extends Notification implements ShouldQueue
     public function via($notifiable)
     {
         if (isset($notifiable->settings) && $notifiable->settings->new_ticket_notification == false) {
-            return [];
+            $return = [];
+        } else {
+          $return = (method_exists($notifiable, 'routeNotificationForSlack') && $notifiable->routeNotificationForSlack() != null) ? ['slack'] : ['mail'];
         }
 
-        return (method_exists($notifiable, 'routeNotificationForSlack') && $notifiable->routeNotificationForSlack() != null) ? ['slack'] : ['mail'];
+        return $return;
     }
 
     /**
@@ -43,17 +46,22 @@ class TicketCreated extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+
+      $url = $notifiable instanceof Requester ? route('requester.tickets.show', $this->ticket->public_token) : route('tickets.show', $this->ticket);
+
         $mail = (new MailMessage)
-            ->subject(__('notification.newTicket').": #{$this->ticket->id}: {$this->ticket->title}")
-            ->replyTo(config('mail.fetch.username'))
+            ->subject(__('notification.newTicket').": #{$this->ticket->reference_number}: {$this->ticket->title}")
+            ->replyTo($this->ticket->requester->email)
             ->view('emails.ticket', [
                     'title'  => __('notification.newTicketCreated'),
                     'ticket' => $this->ticket,
-                    'url'    => route('tickets.show', $this->ticket),
+                    'url'     => $url,
                 ]
             );
+
         if ($this->ticket->requester->email) {
-            $mail->from($this->ticket->requester->email, $this->ticket->requester->name);
+            //$mail->from($this->ticket->requester->email, $this->ticket->requester->name);
+            $mail->from(config('mail.fetch.username'), $this->ticket->requester->name);
         }
 
         return $mail;

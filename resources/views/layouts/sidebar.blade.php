@@ -2,7 +2,7 @@
     <div class="show-mobile absolute ml2 mt-2 fs3">
         <span class="fs3 white" onclick="toggleSidebar()">X</span>
     </div>
-    <img src="{{ url("/images/logo_grey.png") }}">
+    <img class="logo" src="{{ url("/images/logo_grey.png") }}">
 
     @if($team = auth()->user()->teams()->first())
       @if($team->id == 1)
@@ -19,14 +19,17 @@
       @include('components.sidebarItem', ["url" => route('ticket_attachments.index') . "?default=true",          "title" =>  'Buscador de archivos'])
     </ul>
 
-    @if($team = auth()->user()->teams()->first())
-    <h4>Equipo {{$team->name}}</h4>
-    <ul>
-      <li>
-        <div class="hidden" id="register-link2-{{$team->id}}"> {{ route('register') }}?team_token={{$team->token}}&team_name={{$team->name}} </div>
-        <a href="#" onclick="copyToClipboard('#register-link2-{{$team->id}}')">@icon(clipboard) Copiar link de registro</a>
-      </li>
-    </ul>
+    @if($team = auth()->user()->teams()->first() && $team->id == 1)
+
+      <h4>Equipos</h4>
+      <ul>
+      @foreach(App\Team::get() as $_team)
+        <li>
+          <div class="hidden" id="register-link2-{{$_team->id}}"> {{ route('register') }}?team_token={{$_team->token}}&team_name={{$_team->name}} </div>
+          <a href="#" onclick="copyToClipboard('#register-link2-{{$_team->id}}')">@icon(clipboard) Copiar link de registro {{$_team->name}}</a>
+        </li>
+      @endforeach
+      </ul>
     @endif
 
     @if (auth()->user()->can_see_reports)

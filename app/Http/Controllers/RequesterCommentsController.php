@@ -9,6 +9,7 @@ class RequesterCommentsController extends Controller
     public function store($public_token)
     {
         $ticket = Ticket::findWithPublicToken($public_token);
+
         $ticket->addComment(null, request('body'), $this->getNewStatus());
 
         return back();

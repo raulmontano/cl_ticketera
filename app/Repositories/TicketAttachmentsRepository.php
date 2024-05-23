@@ -9,12 +9,12 @@ class TicketAttachmentsRepository
 {
     public function empty()
     {
-        return Attachment::whereNull('created_at');
+        return Attachment::whereNull('created_at')->orderBy('attachments.created_at','DESC');
     }
 
     public function all()
     {
-        return Attachment::whereNotNull('created_at');
+        return Attachment::whereNotNull('created_at')->orderBy('attachments.created_at','DESC');
     }
 
     public function search($text)

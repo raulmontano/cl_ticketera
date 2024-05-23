@@ -41,6 +41,10 @@ class TicketsRepository
             return Ticket::where('status', '<', 99);
         }
 
+        if (request('filters')) {
+          return Ticket::where('status', '<', 99);
+        }
+
         return auth()->user()->teamsTickets()->where('status', '<', 99);
     }
 

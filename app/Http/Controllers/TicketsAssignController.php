@@ -17,10 +17,9 @@ class TicketsAssignController extends Controller
 
             //FIXME if assignto is the current user, go to show, then go to index
             if (auth()->user()->id == request('user_id')) {
-                return redirect()->route('tickets.show', $ticket);
+                return redirect()->route('tickets.show', $ticket)->withMessage('Ticket asignado');
             }
         }
-
-        return redirect()->route('tickets.show',$ticket);
+        return redirect()->route('tickets.show', $ticket)->withMessage('Ticket asignado');
     }
 }

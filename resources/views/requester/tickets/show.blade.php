@@ -1,24 +1,18 @@
 @extends('layouts.requester')
 @section('content')
     <div class="description comment">
-        <h2>{{ $ticket->title }}</h2>
+        <h2>#{{  $ticket->reference_number }} - {{ $ticket->title }}</h2>
         <p>{{ $ticket->body }}</p>
         <span class="label ticket-status-{{ $ticket->statusName() }}">{{ __('ticket.' . $ticket->statusName()) }}</span>&nbsp;
         <span class="date">{{  $ticket->created_at->diffForHumans() }}, creado por: {{  $ticket->requester->name }} &lt;{{  $ticket->requester->email }}&gt;</span>
     </div>
 
-    @if($ticket->status != App\Ticket::STATUS_CLOSED)
+    @if(!in_array($ticket->status,[App\Ticket::STATUS_SOLVED,App\Ticket::STATUS_CLOSED,App\Ticket::STATUS_SPAM,App\Ticket::STATUS_ERROR]))
         <div class="comment new-comment">
             {{ Form::open(["url" => route("requester.comments.store",$ticket->public_token)]) }}
             <textarea name="body"></textarea>
-            <br>
-            @if($ticket->status == App\Ticket::STATUS_SOLVED)
-                {{ __('ticket.reopen') }} ? {{ Form::checkbox('reopen') }}
-            @else
-                {{ __('ticket.isSolvedQuestion') }} {{ Form::checkbox('solved') }}
-            @endif
-            <br><br>
-            <button class="uppercase ph3"> @busy @icon(comment) {{ __('ticket.comment') }}</button>
+            <input type="hidden" name="public" value="1">
+            <button class="uppercase ph3"> @busy @icon(comment) ENVIAR {{ __('ticket.comment') }}</button>
             {{ Form::close() }}
         </div>
     @endif

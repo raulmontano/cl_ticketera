@@ -12,16 +12,35 @@ class Attachment extends BaseModel
         return $this->morphTo();
     }
 
+    public function causer()
+    {
+        return $this->morphTo();
+    }
+
     public static function storeAttachmentFromRequest($request, $attachable)
     {
         $files = $request->file('attachment');
 
         $class = (new \ReflectionClass($attachable))->getShortName();
 
+        $start = strpos($attachable->title,'ID ');
+        $idtext = '';
+
+        if($start !== false){
+          $len = strpos($attachable->title,' -');
+          $idtext = substr($attachable->title,0, $len);
+        }
+
+        $user = \Auth::user();
+        $causer = $user ? $user : $attachable->requester;
+
         foreach ($files as $file) {
-            $path = str_replace(' ', '_', $file->getClientOriginalName());
+            $id = $idtext ? ' - [' . $idtext . ']' : '';
+            $path = $attachable->reference_number . $id . ' - ' . str_replace(' ', '_', $file->getClientOriginalName());
             Storage::putFileAs(strtolower($class) . '_'.$attachable->id . '/', $file, $path);
-            $attachable->attachments()->create(['path' => $path]);
+            $attachment = $attachable->attachments()->create(['path' => $path]);
+
+            $attachment->causer()->associate($causer)->save();
         }
     }
 

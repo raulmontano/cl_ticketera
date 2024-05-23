@@ -1,18 +1,17 @@
-<div class="description actions comment">
+<div class="comment">
     {{ Form::open(["url" => route("{$endpoint}.assign", $object)]) }}
-    <table class="w50 no-padding">
-
-        <tr>
+    <div class="form-row">
+        <div class="col-md-8">
             @can("assignToTeam", $object)
-                <td>{{ __('ticket.assigned') }}:</td>
-                <td>{{ Form::select('user_id', App\Team::membersByTeam(), $object->user_id, ['class' => 'w100']) }}</td>
+                {{ __('ticket.assigned') }}:
+                {{ Form::select('user_id', App\Team::membersByTeam(), $object->user_id, ['class' => 'w100']) }}
             @else
                 @if ($object->team)
-                    <td>{{ __('ticket.editor') }}:</td>
+                    {{ __('ticket.editor') }}:
                     @if($object->user_id)
-                      <td>{{ Form::select('user_id', createSelectArray( $object->team->members), $object->user_id, ['class' => 'w100']) }}</td>
+                      {{ Form::select('user_id', createSelectArray( $object->team->members), $object->user_id, ['class' => 'w100']) }}
                     @else
-                      <td>{{ Form::select('user_id', createSelectArray( $object->team->members, true,'-- Sin asignación --'), $object->user_id, ['class' => 'w100']) }}</td>
+                      {{ Form::select('user_id', createSelectArray( $object->team->members, true,'-- Sin asignación --'), $object->user_id, ['class' => 'w100']) }}
                     @endif
                 @endif
             @endcan
@@ -21,12 +20,11 @@
                 @include('components.assignTeamField', ["team" => $object->team])
             @endcan
 
-            <td class="text-right" colspan="2">
-                <button class="ph4 btn btn-primary"> {{ __('ticket.assign') }}</button>
-            </td>
+        </div>
+        <div class="col-md-4">
+          <button class="ph4 btn btn-primary"> {{ __('ticket.assign') }}</button>
+        </div>
 
-        </tr>
-
-    </table>
+    </div>
     {{ Form::close() }}
 </div>

@@ -67,11 +67,13 @@ class Ticket extends BaseModel
             'ticket_type_id'         => $type,
             'ticket_company_id'         => $company,
             'ticket_post_type_id'         => $post_type,
-            //'start_date' => $start_date,
-            //'end_date'=> $end_date,
+            'start_date' => $start_date,
+            'end_date'=> $end_date,
             'public_token' => Str::random(24),
             'priority' => self::PRIORITY_LOW,
         ]);
+
+        $channels[] = 'Solicitante de Contenido'; //FIXME PARA QUE LO QUIEREN HARDCOEADO?
 
         $ticket->attachTags($channels); //channels
         $ticket->attachCategories($categories); //categories
@@ -79,13 +81,15 @@ class Ticket extends BaseModel
         $ticket->assignToTeam(Settings::defaultTeamId()); //editores
 
         tap(new TicketCreated($ticket), function ($newTicketNotification) use ($ticket) {
-            Admin::notifyAll($newTicketNotification);
+            //Admin::notifyAll($newTicketNotification);
+
             if ($ticket->team) {
-                $ticket->team->notify($newTicketNotification);
+              //$ticket->team->notify($newTicketNotification);
             }
+
+            $ticket->requester->notify($newTicketNotification);
+
         });
-
-
 
         return $ticket;
     }
@@ -99,9 +103,11 @@ class Ticket extends BaseModel
           'ticket_company_id'         => $company,
           'ticket_post_type_id'         => $post_type,
           'priority' => $priority,
-          //'start_date' => $start_date,
-          //'end_date'=> $end_date,
+          'start_date' => $start_date,
+          'end_date'=> $end_date,
         ]);
+
+        $channels[] = 'Solicitante de Contenido'; //FIXME PARA QUE LO QUIEREN HARDCOEADO?
 
         $this->syncTags($channels); //channels
 
@@ -237,7 +243,7 @@ class Ticket extends BaseModel
         if ($newStatus && $newStatus != $previousStatus) {
             $this->updateStatus($newStatus);
         } elseif (! $user && $this->status != static::STATUS_NEW) {
-            $this->updateStatus(static::STATUS_OPEN);
+            //$this->updateStatus(static::STATUS_OPEN);
         } else {
             $this->touch();
         }
@@ -260,6 +266,7 @@ class Ticket extends BaseModel
 
     public function addComment($user, $body, $newStatus = null)
     {
+
         if ($user && $this->isEscalated()) {
             return $this->addNote($user, $body);
         }
@@ -274,7 +281,13 @@ class Ticket extends BaseModel
             'body'       => $body,
             'user_id'    => $user ? $user->id : null,
             'new_status' => $newStatus ?: $this->status,
-        ])->notifyNewComment();
+            'private'    => !request('public'),
+        ]);
+
+        if(request('public') && $user){
+          $comment->notifyNewComment();
+        }
+
         event(new TicketCommented($this, $comment, $previousStatus));
 
         return $comment;
@@ -294,8 +307,12 @@ class Ticket extends BaseModel
             'body'       => $body,
             'user_id'    => $user->id,
             'new_status' => $this->status,
-            'private'    => true,
-        ])->notifyNewNote();
+            'private'    => !request('public'),
+        ]);
+
+        if(request('public')){
+          $comment->notifyNewNote();
+        }
     }
 
     public function merge($user, $tickets)
@@ -314,10 +331,24 @@ class Ticket extends BaseModel
     public function updateStatus($status)
     {
         $this->update(['status' => $status, 'updated_at' => Carbon::now()]);
+
         TicketEvent::make($this, trans('notification.events.updateStatus').': '.trans("ticket." . $this->statusName()));
-        if ($status == Ticket::STATUS_SOLVED && ! $this->rating && config('handesk.sendRatingEmail')) {
+        if ($status == Ticket::STATUS_SOLVED && !$this->rating && config('handesk.sendRatingEmail')) {
             $this->requester->notify((new RateTicket($this))->delay(now()->addMinutes(60)));
         }
+
+        if(in_array($status,[self::STATUS_SOLVED,self::STATUS_CLOSED,self::STATUS_SPAM,self::STATUS_ERROR])){
+
+          $user = \Auth::user();
+
+          $comment = $this->comments()->create([
+              'body'       => 'Ticket cerrado',
+              'user_id'    => $user->id,
+              'new_status' => $status,
+          ])->notifyNewComment();
+
+        }
+
     }
 
     public function updatePriority($priority)

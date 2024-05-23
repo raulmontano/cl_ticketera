@@ -56,7 +56,15 @@ class TicketsController extends Controller
             $requester = request('requester');
         }
 
+        if (request()->hasFile('attachment')) {
+            \Session::flash('alert-type', 'warning');
+            \Session::flash('message', 'Selecciona nuevamente los archivos');
+        }
+
         $this->validate(request(), $rules);
+
+        \Session::forget('alert-type');
+        \Session::forget('message');
 
         $ticket = Ticket::createAndNotify(
             $requester,
@@ -69,7 +77,7 @@ class TicketsController extends Controller
             request('post_type'),
             request('start_date'),
             request('end_date'),
-        );
+            );
 
         //FIXME
         if (request('status')) {
@@ -125,12 +133,18 @@ class TicketsController extends Controller
             request('priority'),
             request('start_date'),
             request('end_date'),
-        );
+            );
 
         if ($ticket && request()->hasFile('attachment')) {
             Attachment::storeAttachmentFromRequest(request(), $ticket);
         }
 
-        return back();
+        /*
+        $notification = array(
+                'message' => 'Successfully Done',
+                'alert-type' => 'success'
+            );*/
+
+        return back()->withMessage('Actualizado');
     }
 }

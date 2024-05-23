@@ -2,6 +2,7 @@
 
 namespace App\Thrust;
 
+use Carbon\Carbon;
 use App\Repositories\TicketsIndexQuery;
 use App\ThrustHelpers\Actions\ChangePriority;
 use App\ThrustHelpers\Actions\ChangeStatus;
@@ -45,18 +46,13 @@ class Ticket extends Resource
           }),*/
 
           Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
-              return $ticket->reference_number;
+              return $ticket->reference_number . '- '. Str::limit($ticket->subject ?? $ticket->title, 25);
           })->route('tickets.show'),
-
-          Text::make('title', __('ticket.subject'))->displayWith(function ($ticket) {
-              return Str::limit($ticket->subject ?? $ticket->title, 25);
-          }),
 
           Text::make('tickets.status', __('ticket.status'))->displayWith(function ($ticket) {
               return __("ticket." . $ticket->statusName() );
           }),
 
-          Text::make('requester.name', trans_choice('ticket.requester', 2)),
         ];
 
         $isEditor = false;
@@ -68,18 +64,29 @@ class Ticket extends Resource
           $fields[] = Text::make('team.name', __('ticket.team'));
         }
 
-        $fields[] = Text::make('tickets.id', trans_choice('ticket.user', 1) . ' MC')->displayWith(function ($ticket) {
-            return $ticket->user_mc ? $ticket->user_mc->name : '-- Sin asignar --';
-        });
+        if(!$isEditor){
+          $fields[] = Text::make('requester.name', trans_choice('ticket.requester', 2));
+        }
 
-        if(request()->has('pending') || $isEditor){
+        if(request()->has('assigned') && !$isEditor){
+          //
+        } else {
+          $fields[] = Text::make('tickets.id', trans_choice('ticket.user', 1) . ' MC')->displayWith(function ($ticket) {
+            return $ticket->user_mc ? $ticket->user_mc->name : '<span class="text-nowrap">-- Sin asignar --</span>';
+          });
+        }
+
+
+        if(request()->has('assigned') && $isEditor){
+          //dont show editor when is self assigned
+        }else if(request()->has('pending') || $isEditor){
           $fields[] = Text::make('user.name', 'Editor')->displayWith(function ($ticket) {
-              return $ticket->user ? $ticket->user->name : '-- Sin asignar --';
+              return $ticket->user ? $ticket->user->name : '<span class="text-nowrap">-- Sin asignar --</span>';
           });
         }
 
         $fields[] = Text::make('tickets.type', __('ticket.type'))->displayWith(function ($ticket) {
-            return $ticket->type->name .' '.  $ticket->postType->name .' '.  $ticket->company->name;
+            return '<span class="text-nowrap">'.$ticket->type->name .' '.  $ticket->postType->name .' '.  $ticket->company->name . '</span>';
         });
 
         $fields[] = Text::make('tickets.priority', __('ticket.priority'))->displayWith(function ($ticket) {
@@ -92,7 +99,10 @@ class Ticket extends Resource
             return $timeInMc ? $timeInMc->created_at->diffInDays() .' días' : '-';
         });
 */
+
+    if(!$isEditor){
         $fields[] = Date::make('created_at', __('ticket.requested'))->displayWith(function ($ticket) {
+
 
               $days = $ticket->created_at->diffInDays();
 
@@ -105,15 +115,22 @@ class Ticket extends Resource
               }
 
               return "<span style='color:$color;'>" . $ticket->created_at->diffForHumans() . '</span>';
+
             });
+          }
 
             if(request()->has('pending') || $isEditor){
-              $fields[] = Text::make('tickets.id', 'Editores')->displayWith(function ($ticket) {
+              $fields[] = Text::make('tickets.id', 'Enviado a Editores')->displayWith(function ($ticket) {
 
                 $timeInEditor = $ticket->time_in_editor->first();
 
+
+
                 if($timeInEditor){
 
+                  return $timeInEditor->created_at->diffForHumans();
+
+                  /* FIXME
                 $days = $timeInEditor->created_at->diffInDays();
 
                 if($days <= 1){
@@ -125,11 +142,44 @@ class Ticket extends Resource
                 }
 
                 return "<span style='color:$color;'>" . $timeInEditor->created_at->diffForHumans() . '</span>';
+                */
               } else {
                 return '-';
               }
 
               });
+
+            }
+
+            if($isEditor){
+
+              $fields[] = Text::make('tickets.id', 'Fecha compromiso')->displayWith(function ($ticket) {
+
+                $timeInEditor = $ticket->time_in_editor->first();
+
+                $dueDate = Carbon::parse(calcularFechaSolucion($timeInEditor->created_at));
+
+                $days = $dueDate->diffInDays(now(), false);
+
+                if($days <= -2){
+                  $color = 'green';
+                } elseif( $days <= 0 ){
+                  $color = 'orange';
+                } else {
+                  $color = 'red';
+                }
+
+                return "<span style='color:$color;'>" . $dueDate->diffForHumans(). '</span>';
+
+              });
+
+              $fields[] = Text::make('tickets.id', 'Tiempo editores')->displayWith(function ($ticket) {
+              $timeInEditor = $ticket->time_in_editor->first();
+
+              return DiferenciaTiempoTranscurrido($timeInEditor->created_at);
+
+
+                            });
             }
 
         return $fields;
@@ -172,7 +222,7 @@ class Ticket extends Resource
             new TitleFilter(),
             new ReferenceNumberFilter(),
             new CompanyFilter(),
-//            new StatusFilter(),
+            new StatusFilter(),
             //new PriorityFilter(),
 //            new EscalatedFilter(),
             new TicketTypeFilter(),

@@ -28,7 +28,6 @@ class RequesterTicketsController extends Controller
 
     public function create()
     {
-
         return view('requester.tickets.create');
     }
 
@@ -49,7 +48,15 @@ class RequesterTicketsController extends Controller
         $rules[] = ['requester' => 'required|array'];
         $requester = request('requester');
 
+        if (request()->hasFile('attachment')) {
+            \Session::flash('alert-type', 'warning');
+            \Session::flash('message', 'Selecciona nuevamente los archivos');
+        }
+
         $this->validate(request(), $rules);
+
+        \Session::forget('alert-type');
+        \Session::forget('message');
 
         $ticket = Ticket::createAndNotify(
             $requester,
@@ -62,7 +69,7 @@ class RequesterTicketsController extends Controller
             request('post_type'),
             request('start_date'),
             request('end_date'),
-        );
+            );
 
         //create
         $ticket->updateStatus(Ticket::STATUS_NEW);

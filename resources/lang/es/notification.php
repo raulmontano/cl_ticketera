@@ -17,7 +17,7 @@ return [
     'rateTicketDesc'     => 'Nos encantaría saber tu feedback sobre esta Solicitud. Simplemente pulsa sobre el número para ayudarnos a seguir mejorando!',
     'ticketRated'        => 'Solicitud calificada',
     'answerTicket'       => 'Añada un comentario respondiendo a este correo electrónico o',
-    'answerTicketLink'   => 'ver el ticket en Handesk',
+    'answerTicketLink'   => 'Ver el ticket en GC SomosClave',
 
     'events' => [
       'assignedTo'   => 'Asignada a agente',

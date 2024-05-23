@@ -15,7 +15,9 @@
     <link href="{{ asset('css/all.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/jquery-ui.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/toastr.css') }}" rel="stylesheet">
 
 </head>
 <body>
@@ -46,6 +48,50 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('js/popper.min.js') }}"></script>
+    <script src="{{ asset('js/toastr.min.js') }}"></script>
     @yield('scripts')
+
+    <script>
+    $( function() {
+      $( document ).tooltip();
+    } );
+    </script>
+
+    <script>
+        @if (Session::has('message'))
+            var type = "{{ Session::get('alert-type', 'info') }}"
+            switch (type) {
+                case 'info':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.info("{{ Session::get('message') }}");
+
+                    break;
+                case 'success':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.success("{{ Session::get('message') }}");
+
+                    break;
+                case 'warning':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.warning("{{ Session::get('message') }}");
+
+
+                    break;
+                case 'error':
+
+                    toastr.options.timeOut = 5000;
+                    toastr.error("{{ Session::get('message') }}");
+
+
+                    break;
+            }
+        @endif
+    </script>
+
 </body>
 </html>

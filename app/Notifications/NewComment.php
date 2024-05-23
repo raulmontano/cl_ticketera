@@ -50,8 +50,8 @@ class NewComment extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $mail = (new MailMessage)
-            ->subject(__('notification.ticketUpdated').": #{$this->ticket->id}: {$this->ticket->title}")
-            ->replyTo(config('mail.fetch.username'))
+            ->subject(__('notification.ticketUpdated').": #{$this->ticket->reference_number}: {$this->ticket->title}")
+            ->replyTo($this->ticket->requester->email)
             ->view('emails.ticket', [
                     'title'   => __('notification.ticketUpdated'),
                     'ticket'  => $this->ticket,

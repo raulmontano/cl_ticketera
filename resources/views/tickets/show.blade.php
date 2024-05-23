@@ -1,12 +1,15 @@
 @extends('layouts.app')
 @section('content')
-    <div class="description">
+    <div class="description container">
         <div class="breadcrumb">
             <a href="{{ route('tickets.index') }}">&lt; {{ trans_choice('ticket.ticket', 2) }}</a>
         </div>
         <div class="card">
           <h3 class="card-header">
-            {{ $ticket->title }} <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} (<b>{{ $ticket->created_at->diffForHumans() }})</b></div>
+            #{{$ticket->reference_number}} · {{ $ticket->title }}
+            <a class="ml4 float-right" title="Vista pública" target="_blank" href="{{route('requester.tickets.show',$ticket->public_token)}}"> @icon(globe) </a>
+            <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} (<b>{{ $ticket->created_at->diffForHumans() }})</b></div>
+
           </h3>
             <div class="card-body">
               <p class="card-text">{!! nl2br($ticket->body) !!}</p>
@@ -28,22 +31,28 @@
         </div>
     </div>
 
-    <div class="description">
+    @if(!in_array($ticket->status,[\App\Ticket::STATUS_SOLVED,\App\Ticket::STATUS_CLOSED,\App\Ticket::STATUS_SPAM,\App\Ticket::STATUS_ERROR])){
+    <div class="container">
+
+      <div class="row">
 
         @can("assignToUser", $ticket)
-        <div class="actions card mb-3">
-          @include('components.assignActions', ["endpoint" => "tickets", "object" => $ticket])
+        <div class="col-md-4">
+          <div class="actions card mb-3">
+            @include('components.assignActions', ["endpoint" => "tickets", "object" => $ticket])
+          </div>
         </div>
         @endcan
 
-        <div class="actions card">
+        <div class="col-md-8">
+          <div class="actions card mb-3">
             {{ Form::open(["url" => route("comments.store", $ticket) , "files" => true, "id" => "comment-form"]) }}
 
-            <table class="w80 no-padding">
+            <div class="form-row comment">
 
-                <tr>
                   @can("updateStatus", $ticket)
-                  <td class="p2">
+                  <div class="col-md-3">
+                      <label>{{ trans_choice('ticket.status', 1)}}:</label>
                       <select id="new_status" name="new_status">
                           @if($ticket->team->id == 2)
                             <option value="{{\App\Ticket::STATUS_NEW}}"  @if($ticket->status == App\Ticket::STATUS_NEW) selected @endif>{{ __("ticket.new" ) }}</option>
@@ -60,27 +69,35 @@
                           @endif
 
                       </select>
-                  </td>
+                    </div>
                   @endcan
-                <td class="w10 p2">
-                  <textarea id="comment-text-area" cols="40" rows="3" placeholder="Mensaje (opcional)" name="body" cols="20">@if(auth()->user()->settings->tickets_signature)&#13;&#13;{{ auth()->user()->settings->tickets_signature }}@endif</textarea>
-                </td>
-            <td >
-              @can("updateStatus", $ticket)
-                  <button class="ph3 ml1 btn btn-primary">{{ __('ticket.update') }} {{ __('ticket.status')}}</button>
-                  @else
-                  <button class="ph3 ml1 btn btn-primary">Enviar mensaje</button>
-                  @endcan
-            </td>
+              <div class="col-md-6">
+                  <textarea id="comment-text-area" class="w100" rows="3" placeholder="Mensaje (opcional)" name="body">@if(auth()->user()->settings->tickets_signature)&#13;&#13;{{ auth()->user()->settings->tickets_signature }}@endif</textarea>
 
-          </tr>
+                  {{ Form::checkbox('public') }} Comunicar al solicitante
+                  <br>
 
-          </table>
+                </div>
+            <div class="col-md-3 d-flex">
+                @can("updateStatus", $ticket)
+                    <button class="ph3 ml1 btn btn-primary align-self-center">{{ __('ticket.update') }} {{ __('ticket.status')}}</button>
+                    @else
+                    <button class="ph3 ml1 btn btn-primary align-self-center">Enviar mensaje</button>
+                    @endcan
+            </div>
+            </div>
 
             {{ Form::close() }}
+          </div>
+        </div>
         </div>
       </div>
+      @endif
 
-
+<div class="description container">
+  <div class="card">
+    <h3 class="card-header">Historial de la solicitud</h3>
     @include('components.ticketComments', ["comments" => $ticket->commentsAndNotesAndEvents()->sortBy('created_at')->reverse() ])
+  </div>
+    </div>
 @endsection

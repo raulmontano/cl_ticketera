@@ -3,12 +3,16 @@
     <div class="form-group col-md-6">
 
       <div class="form-row">
-        <label for="title">{{ __('ticket.subject') }}</label>
+        <label for="title">{{ __('ticket.subject') }}  <span style="color: #007bff;" data-toggle="tooltip" data-placement="top" title="Requerido">
+          &nbsp;<i type="button" class="fa fa-info"></i>
+        <span> </label>
         <input name="title" id="title" class="form-control" required value="{{ old('title') ? old('title') : (request()->has('title') ? request()->get('title') : '' )}}"/>
       </div>
 
       <div class="form-row">
-        <label for="body">{{ __('ticket.body') }}</label>
+        <label for="body">{{ __('ticket.body') }} <span style="color: #007bff;" data-toggle="tooltip" data-placement="top" title="Requerido">
+          &nbsp;<i type="button" class="fa fa-info"></i>
+        <span> </label>
         <textarea  name="body" class="w100" required>{{ old('body') ? old('body') : (request()->has('body') ? request()->get('body') : '' )}}</textarea>
       </div>
     </div>
@@ -19,7 +23,9 @@
     <div class="form-group col-md-3">
 
       <div class="form-row mr-2">
-        <label for="start_date">{{ __('ticket.start_date') }}</label>
+        <label for="start_date">{{ __('ticket.start_date') }}  <span style="color: #007bff;" data-toggle="tooltip" data-placement="top" title="Completar solo si necesitas publicar por un tiempo especifico">
+          &nbsp;<i type="button" class="fa fa-info"></i>
+        <span> </label>
         <input type="date" name="start_date" class="form-control" value="{{ old('start_date') ? old('start_date') : (request()->has('start_date') ? request()->get('start_date') : '' )}}">
       </div>
     </div>
@@ -37,21 +43,18 @@
         <div class="form-group col-md-3">
           <label for="channels">{{ trans_choice('ticket.channels', 1)}}</label>
 
-          <input name="channels[]" id="channel_99" type="hidden" class="form-check-input" value="Solicitante de Contenido">
-
           @foreach(\App\Channel::all() as $i => $channel)
           <div class="form-check">
               <input name="channels[]" id="channel_{{ $channel->id }}" type="checkbox" @if( (old('channels') && in_array($channel->name,old('channels')))) checked @endif class="form-check-input" value="{{ $channel->name }}" />
 
               <label class="form-check-label check" for="channel_{{ $channel->id }}">
                  {{ $channel->name }}
+                 @if(strtolower($channel->name) == 'call center')
+                 <span style="color: #007bff;" data-toggle="tooltip" data-placement="top" title="Canales Digitales, Sucursal Virtual, Redes Sociales.">
+                   &nbsp;<i type="button" class="fa fa-info"></i>
+                 <span>
+                 @endif
               </label>
-
-              @if(strtolower($channel->name) == 'call center')
-              <span data-toggle="tooltip" data-placement="top" title="Canales Digitales, Sucursal Virtual, Redes Sociales.">
-                <i type="button" class="fa fa-info"></i>
-              <span>
-              @endif
 
           </div>
           @endforeach

@@ -6,11 +6,6 @@
         <div class="col-md-6">
 
           <div class="row">
-            <b>{{ __('ticket.reference_number')}}:&nbsp;</b>
-              {{  $ticket->reference_number }}
-          </div>
-
-          <div class="row">
             <b>{{ __('ticket.type')}}:&nbsp;</b>
               {{  $ticket->type->name }} {{  $ticket->postType->name }} {{  $ticket->company->name }}
           </div>
@@ -46,13 +41,12 @@
             @endif
           </div>
         </div>
-        <div class="col-md-12">
+
           @include('components.attachments', ["attachments" => $ticket->attachments])
-        </div>
+
     </div>
   </div>
 
-    {{--<a class="ml4" title="Public Link" href="{{route('requester.tickets.show',$ticket->public_token)}}"> @icon(globe) </a>--}}
 </div>
 
 <div id="ticket-edit" class="hidden" class="">
@@ -85,6 +79,8 @@
 
       <div class="form-row">
         @include('components.uploadAttachment', ["type" => "tickets"])
+
+        @include('components.attachments', ["attachments" => $ticket->attachments, "showDelete"=>true])
       </div>
 
     </div>
@@ -116,13 +112,12 @@
             <input name="channels[]" id="channel_{{ $channel->id }}" type="checkbox" @if(count($channels) && in_array(strtolower($channel->name),$channels)) checked @endif class="form-check-input" value="{{ $channel->name }}" />
              <label class="form-check-label check" for="channel_{{ $channel->id }}">
                {{ $channel->name }}
+               @if(strtolower($channel->name) == 'call center')
+               <span style="color: #007bff;" data-toggle="tooltip" data-placement="top" title="Canales Digitales, Sucursal Virtual, Redes Sociales.">
+                 &nbsp;<i type="button" class="fa fa-info"></i>
+               <span>
+               @endif
             </label>
-
-            @if(strtolower($channel->name) == 'call center')
-            <span data-toggle="tooltip" data-placement="top" title="Canales Digitales, Sucursal Virtual, Redes Sociales.">
-              <i type="button" class="fa fa-info"></i>
-            <span>
-            @endif
         </div>
         @endforeach
       </div>
