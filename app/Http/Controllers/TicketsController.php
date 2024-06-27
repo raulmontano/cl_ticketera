@@ -117,7 +117,7 @@ class TicketsController extends Controller
                     'type'      => 'required|exists:ticket_types,id',
                     'company'   => 'required|exists:ticket_companies,id',
                     //'team_id'   => 'nullable|exists:teams,id',
-                    'priority'  => 'required|integer',
+                    //'priority'  => 'required|integer',
                 ];
 
         $this->validate(request(), $rules);
@@ -130,7 +130,9 @@ class TicketsController extends Controller
             request('type'),
             request('company'),
             request('post_type'),
-            request('priority'),
+            request('priority') ?:1,
+            request('inform'),
+            request('complexity'),
             request('start_date'),
             request('end_date'),
             );

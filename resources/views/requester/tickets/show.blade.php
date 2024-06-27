@@ -18,3 +18,16 @@
     @endif
     @include('components.ticketComments', ["comments" => $ticket->comments])
 @endsection
+
+@push('edit-scripts')
+
+    <script>
+      $(document).ready(function(){
+          $('form').submit(function(){
+              $(this).children('input[type=submit]').prop('disabled', true);
+              $(this).find(':button').prop('disabled', true);
+          });
+      });
+    </script>
+
+@endpush

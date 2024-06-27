@@ -111,4 +111,16 @@ class User extends Authenticatable
 
         return parent::delete();
     }
+
+    public function isEditor()
+    {
+        $isEditor = false;
+
+        if ($this->teams()->count()) {
+            //
+            $isEditor = ($this->teams()->first()->id == 1);
+        }
+
+        return $isEditor;
+    }
 }

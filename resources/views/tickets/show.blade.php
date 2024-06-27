@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    @if(!in_array($ticket->status,[\App\Ticket::STATUS_SOLVED,\App\Ticket::STATUS_CLOSED,\App\Ticket::STATUS_SPAM,\App\Ticket::STATUS_ERROR])){
+    @if(!in_array($ticket->status,[\App\Ticket::STATUS_SOLVED,\App\Ticket::STATUS_CLOSED,\App\Ticket::STATUS_SPAM,\App\Ticket::STATUS_ERROR]))
     <div class="container">
 
       <div class="row">
@@ -88,6 +88,7 @@
             </div>
 
             {{ Form::close() }}
+
           </div>
         </div>
         </div>
@@ -100,4 +101,21 @@
     @include('components.ticketComments', ["comments" => $ticket->commentsAndNotesAndEvents()->sortBy('created_at')->reverse() ])
   </div>
     </div>
+
 @endsection
+
+
+@push('edit-scripts')
+
+    <script>
+      $(document).ready(function(){
+
+          $('form#comment-form').submit(function(){
+
+              $(this).children('input[type=submit]').prop('disabled', true);
+              $(this).find(':button').prop('disabled', true);
+          });
+      });
+    </script>
+
+@endpush

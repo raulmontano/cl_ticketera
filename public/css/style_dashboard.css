@@ -784,3 +784,31 @@ margin-top: 5px;
 #errors ul {
 	margin-bottom: 0px;
 }
+
+
+.ticket-complexity-low{
+  background-color:gray;
+	color:white;
+}
+
+.ticket-complexity-normal{
+  color:white;
+	background-color: #33bc8c;
+}
+
+.ticket-complexity-high{
+  color:white;
+	background-color:orange;
+}
+
+span.label {
+	padding: 2px 4px;
+}
+
+.form-row {
+	padding-bottom: 8px;
+}
+
+#ticket-info .row {
+	padding-bottom: 2px;
+}

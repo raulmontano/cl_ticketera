@@ -30,7 +30,9 @@ return [
     'comment'    => 'Comentario',
     'commentAs'  => 'Comentar como',
     'assign'     => 'Asignar',
-    'priority'     => 'Comunicar',
+    'inform'     => 'Comunicar',
+    'priority'   => 'Prioridad',
+    'complexity' => 'Complejidad',
     'status'     => 'Estado',
 
     'channels'        => 'Segmentos/Canales',
@@ -60,7 +62,7 @@ return [
     'attachment'         => 'Archivo|Archivos',
     'uploadAttachment'   => 'Subir un adjunto',
     'attachFile'         => 'Adjuntar un archivo',
-    'attachFileLeyend'    => 'Selecciona todos los archivos relacionados a esta solicitud(máximo permitido: 15 MB)',
+    'attachFileLeyend'    => 'Selecciona todos los archivos relacionados a esta solicitud (máximo permitido: 25 MB)',
 
     'escalate'           => 'Escalar',
     'escalated'          => 'Escalado',
@@ -70,10 +72,10 @@ return [
     'seeIssue'           => 'Ver incidencia',
     'createIdea'         => 'Crear Idea',
     'seeIdea'            => 'Ver Idea',
-    'low'                => 'No', // comunicar=no
-    'normal'             => 'Normal', //comunicar
-    'high'               => 'Sí', // comunicar=si
-    'blocker'            => 'Bloqueador', //comunicar
+    'low'                => 'Baja',
+    'normal'             => 'Normal',
+    'high'               => 'Alta',
+    'blocker'            => 'Bloqueador',
     'thanksForTheRating' => '¡Muchas gracias!',
     'rated'              => 'Clasificado',
     'ticketAttachment'         => 'Archivos',
@@ -84,4 +86,15 @@ return [
 
     'start_date' => 'Desde',
     'end_date' => 'Hasta',
+
+    'inform-label' => [
+      'yes'                => 'Sí',
+      'no'             => 'No',
+    ],
+
+    'complexity-label' => [
+      'low'                => 'Baja', // comunicar=no
+      'normal'             => 'Media', //comunicar
+      'high'               => 'Alta', // comunicar=si
+    ]
 ];

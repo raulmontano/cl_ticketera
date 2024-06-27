@@ -18,13 +18,9 @@
         </div>
 
         <br><br>
-        Su solicitud ha sido recepcionada exitosamente, pronto tendrás noticias Claves
+        Hola, hemos recibido tu solicitud. Puedes hacer seguimiento mediante el siguiente enlace.
         <br><br>
-
-        <div style="margin-top:40px">
-            <a href="{{$url}}">{{__('notification.answerTicketLink')}}</a>
-        </div>
-
+        <a href="{{$url}}">{{__('notification.answerTicketLink')}}</a>
         <br><br>
         Mail generado automáticamente.
 

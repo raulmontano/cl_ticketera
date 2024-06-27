@@ -55,11 +55,18 @@ class Ticket extends BaseModel
     public const PRIORITY_HIGH      = 3; //COMUNICAR=SI
     public const PRIORITY_BLOCKER   = 4;
 
+    public const COMPLEXITY_LOW       = 1;
+    public const COMPLEXITY_NORMAL    = 2;
+    public const COMPLEXITY_HIGH      = 3;
+
+    public const INFORM_NO    = 0;
+    public const INFORM_YES       = 1;
+
+
     protected $append = ['user_mc'];
 
-    public static function createAndNotify($requester, $title, $body, $channels, $categories, $type, $company, $post_type, $start_date,$end_date)
+    public static function createAndNotify($requester, $title, $body, $channels, $categories, $type, $company, $post_type, $start_date, $end_date)
     {
-
         $requester = Requester::findOrCreate($requester['name'] ?? 'Unknown', $requester['email'] ?? null);
         $ticket    = $requester->tickets()->create([
             'title'        => substr($title, 0, 190),
@@ -71,6 +78,8 @@ class Ticket extends BaseModel
             'end_date'=> $end_date,
             'public_token' => Str::random(24),
             'priority' => self::PRIORITY_LOW,
+            'complexity' => self::COMPLEXITY_LOW,
+            'inform' => self::INFORM_NO,
         ]);
 
         $channels[] = 'Solicitante de Contenido'; //FIXME PARA QUE LO QUIEREN HARDCOEADO?
@@ -84,17 +93,16 @@ class Ticket extends BaseModel
             //Admin::notifyAll($newTicketNotification);
 
             if ($ticket->team) {
-              //$ticket->team->notify($newTicketNotification);
+                //$ticket->team->notify($newTicketNotification);
             }
 
             $ticket->requester->notify($newTicketNotification);
-
         });
 
         return $ticket;
     }
 
-    public function updateWith($title, $body, $channels, $categories, $type, $company, $post_type, $priority, $start_date, $end_date)
+    public function updateWith($title, $body, $channels, $categories, $type, $company, $post_type, $priority, $inform, $complexity, $start_date, $end_date)
     {
         $this->update([
           'title'        => substr($title, 0, 190),
@@ -103,6 +111,8 @@ class Ticket extends BaseModel
           'ticket_company_id'         => $company,
           'ticket_post_type_id'         => $post_type,
           'priority' => $priority,
+          'complexity' => $complexity,
+          'inform' => $inform,
           'start_date' => $start_date,
           'end_date'=> $end_date,
         ]);
@@ -128,37 +138,41 @@ class Ticket extends BaseModel
         return self::where('public_token', $public_token)->firstOrFail();
     }
 
-    public function getUserMcAttribute(){
-      return $this->events()
-                ->select('users.name','users.id','users.email')
-                ->join('users', 'users.id','ticket_events.assigned_to_user_id' )
+    public function getUserMcAttribute()
+    {
+        return $this->events()
+                ->select('users.name', 'users.id', 'users.email')
+                ->join('users', 'users.id', 'ticket_events.assigned_to_user_id')
                 ->join('memberships', function ($join) {
                     $join->on('memberships.user_id', '=', 'ticket_events.user_id');
                     $join->on('memberships.team_id', \DB::raw(2));
-                  })
+                })
                 ->whereNotNull('assigned_to_user_id')
-                ->orderBy('ticket_events.id','DESC')
+                ->orderBy('ticket_events.id', 'DESC')
                 ->first();
     }
 
-    public function getTimeInMcAttribute(){
-      return $this->events()
+    public function getTimeInMcAttribute()
+    {
+        return $this->events()
                 ->select('ticket_events.created_at')
-                ->where('ticket_events.assigned_to_team_id',\DB::raw(2)) //MC
-                ->orderBy('ticket_events.id','DESC')
+                ->where('ticket_events.assigned_to_team_id', \DB::raw(2)) //MC
+                ->orderBy('ticket_events.id', 'DESC')
                 ->get();
     }
 
-    public function getTimeInEditorAttribute(){
-      return $this->events()
+    public function getTimeInEditorAttribute()
+    {
+        return $this->events()
                 ->select('ticket_events.created_at')
-                ->where('ticket_events.assigned_to_team_id',\DB::raw(1)) //EDITORES
-                ->orderBy('ticket_events.id','DESC')
+                ->where('ticket_events.assigned_to_team_id', \DB::raw(1)) //EDITORES
+                ->orderBy('ticket_events.id', 'DESC')
                 ->get();
     }
 
-    public function getReferenceNumberAttribute(){
-      return $this->created_at->format('Ymd_Hi');
+    public function getReferenceNumberAttribute()
+    {
+        return $this->created_at->format('Ymd_Hi');
     }
 
     public function user()
@@ -266,7 +280,6 @@ class Ticket extends BaseModel
 
     public function addComment($user, $body, $newStatus = null)
     {
-
         if ($user && $this->isEscalated()) {
             return $this->addNote($user, $body);
         }
@@ -284,8 +297,8 @@ class Ticket extends BaseModel
             'private'    => !request('public'),
         ]);
 
-        if(request('public') && $user){
-          $comment->notifyNewComment();
+        if (request('public') && $user) {
+            $comment->notifyNewComment();
         }
 
         event(new TicketCommented($this, $comment, $previousStatus));
@@ -310,8 +323,8 @@ class Ticket extends BaseModel
             'private'    => !request('public'),
         ]);
 
-        if(request('public')){
-          $comment->notifyNewNote();
+        if (request('public')) {
+            $comment->notifyNewNote();
         }
     }
 
@@ -337,18 +350,15 @@ class Ticket extends BaseModel
             $this->requester->notify((new RateTicket($this))->delay(now()->addMinutes(60)));
         }
 
-        if(in_array($status,[self::STATUS_SOLVED,self::STATUS_CLOSED,self::STATUS_SPAM,self::STATUS_ERROR])){
+        if (in_array($status, [self::STATUS_SOLVED,self::STATUS_CLOSED,self::STATUS_SPAM,self::STATUS_ERROR])) {
+            $user = \Auth::user();
 
-          $user = \Auth::user();
-
-          $comment = $this->comments()->create([
+            $comment = $this->comments()->create([
               'body'       => 'Ticket cerrado',
               'user_id'    => $user->id,
               'new_status' => $status,
           ])->notifyNewComment();
-
         }
-
     }
 
     public function updatePriority($priority)
@@ -390,28 +400,24 @@ class Ticket extends BaseModel
 
     public function canBeEdited()
     {
-
-      $user = auth()->user();
+        $user = auth()->user();
 
         $isTeamMc = $isAdmin = false;
 
-      if($user->admin){
-        $isAdmin = true;
-      } else {
+        if ($user->admin) {
+            $isAdmin = true;
+        } else {
+            $userTeam = $user->teams()->first();
 
-        $userTeam = $user->teams()->first();
-
-        if($userTeam){
-          if($userTeam->id == 2){
-              $isTeamMc = true;
-          }
+            if ($userTeam) {
+                if ($userTeam->id == 2) {
+                    $isTeamMc = true;
+                }
+            }
         }
 
-      }
-
-      return ! in_array($this->status, [self::STATUS_SOLVED,self::STATUS_CLOSED, self::STATUS_MERGED])
-              && ( $isAdmin || $isTeamMc );
-
+        return ! in_array($this->status, [self::STATUS_SOLVED,self::STATUS_CLOSED, self::STATUS_MERGED])
+              && ($isAdmin || $isTeamMc);
     }
 
     public static function statusNameFor($status)
@@ -444,9 +450,28 @@ class Ticket extends BaseModel
         }
     }
 
+    public function informName()
+    {
+        return $this->inform ? 'yes' : 'no';
+    }
+
     public function priorityName()
     {
         return static::priorityNameFor($this->priority);
+    }
+
+    public static function complexityNameFor($complexity)
+    {
+        switch ($complexity) {
+            case static::COMPLEXITY_LOW: return 'low'; //no
+            case static::COMPLEXITY_NORMAL: return 'normal';
+            case static::COMPLEXITY_HIGH: return 'high'; //sí
+        }
+    }
+
+    public function complexityName()
+    {
+        return static::complexityNameFor($this->complexity);
     }
 
     public function getSubscribableEmail()
@@ -531,3 +556,9 @@ class Ticket extends BaseModel
         return explode('#', $issueEvent->body)[1];
     }
 }
+
+/*
+ALTER TABLE `tickets`
+ADD `complexity` tinyint(4) NOT NULL AFTER `priority`,
+ADD `inform` tinyint(4) NOT NULL AFTER `complexity`;
+*/

@@ -21,9 +21,20 @@
           </div>
         </div>
         <div class="col-md-6">
+
+          <div class="row">
+            <b>{{ __('ticket.inform')}}:&nbsp;</b>
+            {{ __("ticket.inform-label." . $ticket->informName() ) }}
+          </div>
+
+          <div class="row">
+            <b>{{ __('ticket.complexity')}}:&nbsp;</b>
+            <span class="label ticket-complexity-{{ $ticket->complexityName() }}">{{ __("ticket.complexity-label." . $ticket->complexityName() ) }}<span>
+          </div>
+
           <div class="row">
             <b>{{ __('ticket.priority')}}:&nbsp;</b>
-            {{ __("ticket." . $ticket->priorityName() ) }}
+             <span class="label ticket-priority-{{ $ticket->priorityName() }}">{{ __("ticket." . $ticket->priorityName() ) }}</span>
           </div>
 
           <div class="row">
@@ -42,7 +53,11 @@
           </div>
         </div>
 
+        @if(auth()->user()->isEditor())
+          @include('components.attachments', ["attachments" => $ticket->attachments()->where('causer_type','like','%user%')->get()])
+        @else
           @include('components.attachments', ["attachments" => $ticket->attachments])
+        @endif
 
     </div>
   </div>
@@ -82,7 +97,34 @@
 
         @include('components.attachments', ["attachments" => $ticket->attachments, "showDelete"=>true])
       </div>
+    </div>
 
+    <div class="form-group col-md-3 ml-4">
+      <div class="form-row">
+        <label for="inform"><strong>{{ __('ticket.inform')}}</strong></label>
+        <select name="inform" class="custom-select">
+            <option value="0"  @if($ticket->inform == 0) selected @endif>{{ __("ticket.inform-label.no") }}</option>
+            <option value="1"  @if($ticket->inform == 1) selected @endif>{{ __("ticket.inform-label.yes") }}</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="complexity"><strong>{{ __('ticket.complexity')}}</strong></label>
+        <select name="complexity" class="custom-select">
+            <option value="{{\App\Ticket::COMPLEXITY_LOW}}"  @if($ticket->complexity == App\Ticket::COMPLEXITY_LOW) selected @endif         >{{ __("ticket.complexity-label.low") }}</option>
+            <option value="{{\App\Ticket::COMPLEXITY_NORMAL}}"  @if($ticket->complexity == App\Ticket::COMPLEXITY_NORMAL) selected @endif   >{{ __("ticket.complexity-label.normal") }}</option>
+            <option value="{{\App\Ticket::COMPLEXITY_HIGH}}"  @if($ticket->complexity == App\Ticket::COMPLEXITY_HIGH) selected @endif       >{{ __("ticket.complexity-label.high") }}</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-check">
+          <input name="priority" id="priority" class="form-check-input" @if($ticket->priority == App\Ticket::PRIORITY_HIGH) checked @endif type="checkbox" value="{{ App\Ticket::PRIORITY_HIGH }}" />
+          <label class="form-check-label check" for="priority">
+            <strong>Prioridad Alta</strong>
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -157,18 +199,8 @@
             @endforeach
         </select>
 
-        <div class="form-row">
-          <label for="priority">{{ __('ticket.priority')}}</label>
-          <select name="priority" class="custom-select">
-              <option value="{{\App\Ticket::PRIORITY_LOW}}"  @if($ticket->priority == App\Ticket::PRIORITY_LOW) selected @endif         >{{ __("ticket.low") }}</option>
-              <!--option value="{{\App\Ticket::PRIORITY_NORMAL}}"  @if($ticket->priority == App\Ticket::PRIORITY_NORMAL) selected @endif   >{{ __("ticket.normal") }}</option-->
-              <option value="{{\App\Ticket::PRIORITY_HIGH}}"  @if($ticket->priority == App\Ticket::PRIORITY_HIGH) selected @endif       >{{ __("ticket.high") }}</option>
-              <!--option value="{{\App\Ticket::PRIORITY_BLOCKER}}"  @if($ticket->priority == App\Ticket::PRIORITY_BLOCKER) selected @endif >{{ __("ticket.blocker") }}</option-->
-          </select>
-        </div>
 
       </div>
-
     </div>
 
     <div class="form-row justify-content-md-center">

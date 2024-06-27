@@ -13,7 +13,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/all.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/style_dashboard.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/style_dashboard.css?20240618.1') }}" rel="stylesheet">
     <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/jquery-ui.css') }}" rel="stylesheet">
     <link href="{{ asset('css/toastr.css') }}" rel="stylesheet">

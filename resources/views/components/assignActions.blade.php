@@ -1,5 +1,5 @@
 <div class="comment">
-    {{ Form::open(["url" => route("{$endpoint}.assign", $object)]) }}
+    {{ Form::open(["url" => route("{$endpoint}.assign", $object),"id" => "assign-form"]) }}
     <div class="form-row">
         <div class="col-md-8">
             @can("assignToTeam", $object)
@@ -28,3 +28,18 @@
     </div>
     {{ Form::close() }}
 </div>
+
+@push('edit-scripts')
+
+    <script>
+      $(document).ready(function(){
+
+          $('form#assign-form').submit(function(){
+
+              $(this).children('input[type=submit]').prop('disabled', true);
+              $(this).find(':button').prop('disabled', true);
+          });
+      });
+    </script>
+
+@endpush

@@ -17,6 +17,7 @@ class PriorityFilter extends SelectFilter
     {
         return [
             __("ticket.low")     => Ticket::PRIORITY_LOW,
+            __("ticket.normal")  => Ticket::PRIORITY_NORMAL,
             __("ticket.high")    => Ticket::PRIORITY_HIGH,
         ];
     }
@@ -24,5 +25,5 @@ class PriorityFilter extends SelectFilter
     public function getTitle()
     {
         return __('ticket.priority');
-      }
+    }
 }

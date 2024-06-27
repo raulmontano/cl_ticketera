@@ -42,7 +42,12 @@ class TicketsRepository
         }
 
         if (request('filters')) {
-          return Ticket::where('status', '<', 99);
+            if (auth()->user()->isEditor()) {
+                //editors should not see tickets that didn't get to editor team
+                return auth()->user()->teamsTickets()->where('status', '<', 99);
+            }
+
+            return Ticket::where('status', '<', 99);
         }
 
         return auth()->user()->teamsTickets()->where('status', '<', 99);
