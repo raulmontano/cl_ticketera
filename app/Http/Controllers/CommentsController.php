@@ -19,6 +19,7 @@ class CommentsController extends Controller
             }
         } else {
             //nothing
+            return redirect()->route('tickets.show', $ticket);
         }
 
         if ($comment && request()->hasFile('attachment')) {

@@ -116,46 +116,50 @@ function diaViernes($f_asignacion, $id_solicitud)
     return calcularDia($f_asignacion, 4);//cambie de 3 a 6
 }
 
-function DiferenciaTiempoTranscurrido($f_asignacion) {
+function DiferenciaTiempoTranscurrido($f_asignacion, $pausedTime = 0, $f_solucionado = false)
+{
     //date_default_timezone_set('America/Santiago');
 
-
-        // Calcular la diferencia en segundos entre f_solucionado y la fecha actual
+    if ($f_solucionado) {
+        $tiempoActual = $f_solucionado;
+    } else {
         $tiempoActual = date('Y-m-d H:i:s');
-        //echo "Tiempo actual: $tiempoActual<br>";
-        //$diferencia_segundos = strtotime(date('Y-m-d H:i:s')) - strtotime($f_asignacion);
-        $diferencia_segundos = strtotime($tiempoActual) - strtotime($f_asignacion);
-        //echo "Diferencia en segundos: $diferencia_segundos<br>";
+    }
+    // Calcular la diferencia en segundos entre f_solucionado y la fecha actual
 
-        // Calcular días, horas y minutos
-        $dias = floor($diferencia_segundos / (60 * 60 * 24));
-        $horas = floor(($diferencia_segundos % (60 * 60 * 24)) / (60 * 60));
-        $minutos = floor(($diferencia_segundos % (60 * 60)) / 60);
+    //echo "Tiempo actual: $tiempoActual<br>";
+    //$diferencia_segundos = strtotime(date('Y-m-d H:i:s')) - strtotime($f_asignacion);
+    $diferencia_segundos = strtotime($tiempoActual) - strtotime($f_asignacion) - $pausedTime;
+    //echo "Diferencia en segundos: $diferencia_segundos<br>";
 
-        // Imprimir valores para comprobación
-        //echo "Días: $dias, Horas: $horas, Minutos: $minutos<br>";
+    // Calcular días, horas y minutos
+    $dias = floor($diferencia_segundos / (60 * 60 * 24));
+    $horas = floor(($diferencia_segundos % (60 * 60 * 24)) / (60 * 60));
+    $minutos = floor(($diferencia_segundos % (60 * 60)) / 60);
 
-        // Crear la cadena de resultado
-        $resultado = '';
-        if ($dias > 0) {
-            $resultado .= $dias . 'd, ';
-        }
-        if ($horas > 0 || $dias > 0) {
-            $resultado .= $horas . 'h, ';
-        }
-        $resultado .= $minutos . 'm';
+    // Imprimir valores para comprobación
+    //echo "Días: $dias, Horas: $horas, Minutos: $minutos<br>";
 
-        // Aplicar colores según la lógica de días
-        $color = '';
-        if ($dias< 2) {
-            $color = '#2ECC71';
-        } elseif ($dias > 1 && $dias <= 2) {
-            $color = '#F4D03F';
-        } elseif ($dias > 2) {
-            $color = '#E74C3C';
-        }
+    // Crear la cadena de resultado
+    $resultado = '';
+    if ($dias > 0) {
+        $resultado .= $dias . 'd, ';
+    }
+    if ($horas > 0 || $dias > 0) {
+        $resultado .= $horas . 'h, ';
+    }
+    $resultado .= $minutos . 'm';
 
-        // Devolver el resultado junto con el color
-        return '<span style="color: ' . $color . ';">' . $resultado . '</span>';
+    // Aplicar colores según la lógica de días
+    $color = '';
+    if ($dias< 2) {
+        $color = '#2ECC71';
+    } elseif ($dias > 1 && $dias <= 2) {
+        $color = '#F4D03F';
+    } elseif ($dias > 2) {
+        $color = '#E74C3C';
+    }
 
+    // Devolver el resultado junto con el color
+    return '<span style="color: ' . $color . ';">' . $resultado . '</span>';
 }

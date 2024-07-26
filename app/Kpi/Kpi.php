@@ -11,6 +11,7 @@ class Kpi extends BaseModel
     const TYPE_ALL  = 1;
     const TYPE_USER = 2;
     const TYPE_TEAM = 3;
+    const TYPE_TICKET = 4;
 
     const KPI_FIRST_REPLY          = 1;
     const KPI_SOLVED               = 2;
@@ -18,6 +19,7 @@ class Kpi extends BaseModel
     const KPI_REOPENED             = 4;
     const KPI_UNANSWERED_TICKETS   = 5;
     const KPI_RATING               = 6;
+    const KPI_PAUSED               = 8; //same as Ticket::status_paused
 
     public $incrementing = false;
     public $timestamps   = false;

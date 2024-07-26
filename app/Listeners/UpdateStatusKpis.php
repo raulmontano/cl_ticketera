@@ -6,6 +6,7 @@ use App\Events\TicketStatusUpdated;
 use App\Kpi\Kpi;
 use App\Kpi\ReopenedKpi;
 use App\Kpi\SolveKpi;
+use App\Kpi\PausedKpi;
 use App\Ticket;
 use Carbon\Carbon;
 
@@ -15,6 +16,27 @@ class UpdateStatusKpis
     {
         $this->calculateSolvedKpi($event);
         $this->calculateReopenedKpi($event);
+        $this->calculatePausedKpi($event);
+    }
+
+    private function calculatePausedKpi($event)
+    {
+
+        //previous status == paused
+        //actual status = pending
+        if ($event->previousStatus == Ticket::STATUS_PAUSED && $event->ticket->status == Ticket::STATUS_PENDING) {
+            $currentPausedTime = \DB::table('ticket_events')
+                                ->where('ticket_id', $event->ticket->id)
+                                ->where('body', 'Estado actualizado: Pausado')
+                                ->orderBy('created_at', 'DESC')
+                                ->first();
+
+            $now = Carbon::now();
+            $pausedTime = Carbon::parse($currentPausedTime->created_at)->diffInSeconds($now);
+            \Log::info('Guardando: ', [$now,$event->ticket->id, Kpi::TYPE_TICKET,$pausedTime]);
+            //OBTENER EL TIEMPO CUANDO LLEGÓ A PAUSED
+            PausedKpi::obtain($now, $event->ticket->id, Kpi::TYPE_TICKET)->addValue($pausedTime);
+        }
     }
 
     private function calculateSolvedKpi($event)

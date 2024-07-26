@@ -11,6 +11,7 @@ use App\Notifications\TicketAssigned;
 use App\Notifications\TicketCreated;
 use App\Notifications\TicketEscalated;
 use App\Services\IssueCreator;
+use App\Kpi\Kpi;
 use App\Services\TicketLanguageDetector;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -168,6 +169,30 @@ class Ticket extends BaseModel
                 ->where('ticket_events.assigned_to_team_id', \DB::raw(1)) //EDITORES
                 ->orderBy('ticket_events.id', 'DESC')
                 ->get();
+    }
+
+    public function getSolvedDateAttribute()
+    {
+        return \DB::table('comments')
+                ->select('comments.created_at')
+                ->where('comments.ticket_id', $this->id)
+                ->whereIn('comments.new_status', [4]) //SOLVED
+                ->orderBy('comments.id', 'ASC')
+                ->get()
+                ->first();
+    }
+
+
+    public function getKpiPausedTimeAttribute()
+    {
+        return \DB::table('kpis')
+                            ->selectRaw('sum(total) as time')
+                            ->where('relation_id', $this->id)
+                            ->where('type', Kpi::TYPE_TICKET)
+                            ->where('kpi', Kpi::KPI_PAUSED)
+                            ->groupBy('relation_id')
+                            ->get()
+                            ->first();
     }
 
     public function getReferenceNumberAttribute()

@@ -3,6 +3,7 @@
 namespace App\Thrust;
 
 use Carbon\Carbon;
+use App\Ticket as TicketModel;
 use App\Repositories\TicketsIndexQuery;
 use App\ThrustHelpers\Actions\ChangePriority;
 use App\ThrustHelpers\Actions\ChangeStatus;
@@ -39,21 +40,25 @@ class Ticket extends Resource
 
       //dump();
 
-        $fields = [
+        $fields = [];
 
-        /*  Text::make('tickets.id', 'ID')->displayWith(function ($ticket) {
-              return $ticket->id;
-          }),*/
+        if (request()->path() == 'tickets/export') {
+            $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
+                return $ticket->reference_number . ' - '. $ticket->title;
+            })->route('tickets.show');
+        } else {
+            $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
+                return $ticket->reference_number . ' - '. Str::limit($ticket->title, 25);
+            })->route('tickets.show');
+        }
 
-          Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
-              return $ticket->reference_number . '- '. Str::limit($ticket->subject ?? $ticket->title, 25);
-          })->route('tickets.show'),
 
-          Text::make('tickets.status', __('ticket.status'))->displayWith(function ($ticket) {
-              return __("ticket." . $ticket->statusName());
-          }),
 
-        ];
+
+
+        $fields[] = Text::make('tickets.status', __('ticket.status'))->displayWith(function ($ticket) {
+            return __("ticket." . $ticket->statusName());
+        });
 
         $isEditor = false;
 
@@ -128,24 +133,8 @@ class Ticket extends Resource
             $fields[] = Text::make('tickets.id', 'Enviado a Editores')->displayWith(function ($ticket) {
                 $timeInEditor = $ticket->time_in_editor->first();
 
-
-
                 if ($timeInEditor) {
                     return $timeInEditor->created_at->diffForHumans();
-
-                /* FIXME
-                $days = $timeInEditor->created_at->diffInDays();
-
-                if($days <= 1){
-                $color = 'green';
-                } elseif( $days > 1 && $days <=6 ){
-                $color = 'orange';
-                } else {
-                $color = 'red';
-                }
-
-                return "<span style='color:$color;'>" . $timeInEditor->created_at->diffForHumans() . '</span>';
-                */
                 } else {
                     return '-';
                 }
@@ -183,7 +172,29 @@ class Ticket extends Resource
             $fields[] = Text::make('tickets.id', 'Tiempo editores')->displayWith(function ($ticket) {
                 $timeInEditor = $ticket->time_in_editor->first();
                 if ($timeInEditor) {
-                    return DiferenciaTiempoTranscurrido($timeInEditor->created_at);
+                    $solvedDate = false;
+                    $pausedTime = 0;
+
+                    if ($ticket->status == TicketModel::STATUS_PAUSED) {
+                        $currentPausedTime = \DB::table('ticket_events')
+                                          ->where('ticket_id', $ticket->id)
+                                          ->where('body', 'Estado actualizado: Pausado')
+                                          ->orderBy('created_at', 'DESC')
+                                          ->first();
+
+                        $pausedTime = Carbon::parse($currentPausedTime->created_at)->diffInSeconds(Carbon::now());
+                    } elseif ($ticket->status == TicketModel::STATUS_SOLVED) {
+                        $solvedDate = $ticket->solved_date ? $ticket->solved_date->created_at : false;
+                    } else {
+                        //
+                    }
+
+                    //GET TIEMPO PAUSADO
+                    if ($kpt = $ticket->kpi_paused_time) {
+                        $pausedTime += $kpt->time;
+                    }
+
+                    return DiferenciaTiempoTranscurrido($timeInEditor->created_at, $pausedTime, $solvedDate);
                 } else {
                     return "-";
                 }
