@@ -10,30 +10,26 @@ use BadChoice\Thrust\ResourceFilters\Filters;
 
 class TicketExporterController extends Controller
 {
-
-  protected $output = '';
-  protected $indexFields;
+    protected $output = '';
+    protected $indexFields;
 
     public function export()
     {
         $resource = Thrust::make('tickets');
-          $repository = new TicketsRepository();
-          $ticketsQuery = TicketsIndexQuery::get($repository)->with($resource->getWithFields());
+        $repository = new TicketsRepository();
+        $ticketsQuery = TicketsIndexQuery::get($repository)->with($resource->getWithFields());
 
+        if (request('filters')) {
+            Filters::applyFromRequest($ticketsQuery, request('filters'));
+        }
 
+        $this->generate($ticketsQuery, $resource);
 
-          if (request('filters')) {
-              Filters::applyFromRequest($ticketsQuery, request('filters'));
-          }
-
-          $this->generate($ticketsQuery,$resource);
-
-          return response(rtrim($this->output, "\n"), 200, $this->getHeaders('tickets ' . now()->format('Ymd_His')));
-
+        return response(rtrim($this->output, "\n"), 200, $this->getHeaders('tickets ' . now()->format('Ymd_His')));
     }
 
-    public function generate($ticketsQuery,$resource) {
-
+    public function generate($ticketsQuery, $resource)
+    {
         $this->indexFields = $resource->fieldsFlattened()->where('showInIndex', true);
 
         $this->writeHeader();
@@ -64,11 +60,9 @@ class TicketExporterController extends Controller
 
     private function writeRow($row)
     {
-
         $this->indexFields->each(function ($field) use ($row) {
             $this->output .= strip_tags($field->displayInIndex($row)) .';';
         });
         $this->output .= PHP_EOL;
     }
-
 }

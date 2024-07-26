@@ -1,5 +1,7 @@
 @extends('layouts.requester')
 @section('content')
+<div class="row mt-3">
+  <div class="col-9">
     <div class="description comment">
         <h2>#{{  $ticket->reference_number }} - {{ $ticket->title }}</h2>
         <p>{{ $ticket->body }}</p>
@@ -16,7 +18,24 @@
             {{ Form::close() }}
         </div>
     @endif
+
     @include('components.ticketComments', ["comments" => $ticket->comments])
+  </div>
+  <div class="col-3">
+    @if($tickets->count())
+      <h4>Tickets en Proceso ({{ $tickets->count() }})</h4>
+      <ul>
+      @foreach($tickets as $relatedTicket)
+        <li style="border-bottom: solid 1px #f0f0f0; padding-bottom:5px; padding-top:5px;">
+          <a target="_blank" href="{{route('requester.tickets.show',$relatedTicket->public_token)}}">#{{  $relatedTicket->reference_number }} </a>
+        </li>
+      @endforeach
+      </ul>
+    @else
+      Ningún ticket creado
+    @endif
+  </div>
+  </div>
 @endsection
 
 @push('edit-scripts')

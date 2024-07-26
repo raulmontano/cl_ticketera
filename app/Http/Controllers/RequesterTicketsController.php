@@ -12,7 +12,13 @@ class RequesterTicketsController extends Controller
     {
         $ticket = Ticket::findWithPublicToken($public_token);
 
-        return view('requester.tickets.show', ['ticket' => $ticket]);
+        $tickets = $ticket->requester->tickets()
+                                        ->where('id', '!=', $ticket->id)
+                                        ->whereNotIn('status', [4,5,7])
+                                        ->orderBy('created_at', 'DESC')
+                                        ->get();
+
+        return view('requester.tickets.show', ['ticket' => $ticket, 'tickets' => $tickets]);
     }
 
     public function rate($public_token)
