@@ -14,7 +14,6 @@ class RequesterTicketsController extends Controller
 
         $tickets = $ticket->requester->tickets()
                                         ->where('id', '!=', $ticket->id)
-                                        ->whereNotIn('status', [4,5,7])
                                         ->orderBy('created_at', 'DESC')
                                         ->get();
 

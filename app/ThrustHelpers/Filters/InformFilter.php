@@ -2,11 +2,11 @@
 
 namespace App\ThrustHelpers\Filters;
 
-use App\TicketPostType;
+use App\TicketCompany;
 use BadChoice\Thrust\Filters\SelectFilter;
 use Illuminate\Http\Request;
 
-class TicketPostTypeFilter extends SelectFilter
+class InformFilter extends SelectFilter
 {
     public function apply(Request $request, $query, $value)
     {
@@ -14,7 +14,7 @@ class TicketPostTypeFilter extends SelectFilter
             return $query;
         }
 
-        return $query->where('ticket_post_type_id', $value);
+        return $query->whereIn('inform', $value);
     }
 
     public function display($filtersApplied)
@@ -27,13 +27,11 @@ class TicketPostTypeFilter extends SelectFilter
 
     public function options()
     {
-        return TicketPostType::all()->mapWithKeys(function ($type) {
-            return [$type->name => $type->id];
-        })->toArray();
+        return ['Sí' => 1, 'No' => 0];
     }
 
     public function getTitle()
     {
-        return trans_choice('ticket.postType', 2);
+        return trans('ticket.inform');
     }
 }

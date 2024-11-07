@@ -2,11 +2,11 @@
 
 namespace App\ThrustHelpers\Filters;
 
-use App\TicketPostType;
+use App\Team;
 use BadChoice\Thrust\Filters\SelectFilter;
 use Illuminate\Http\Request;
 
-class TicketPostTypeFilter extends SelectFilter
+class UserEditorFilter extends SelectFilter
 {
     public function apply(Request $request, $query, $value)
     {
@@ -14,7 +14,7 @@ class TicketPostTypeFilter extends SelectFilter
             return $query;
         }
 
-        return $query->where('ticket_post_type_id', $value);
+        return $query->whereIn('tickets.user_id', $value);
     }
 
     public function display($filtersApplied)
@@ -27,13 +27,14 @@ class TicketPostTypeFilter extends SelectFilter
 
     public function options()
     {
-        return TicketPostType::all()->mapWithKeys(function ($type) {
-            return [$type->name => $type->id];
+        //EDITOR TEAM IS =1
+        return Team::find(1)->members()->get()->mapWithKeys(function ($user) {
+            return [$user->name => $user->id];
         })->toArray();
     }
 
     public function getTitle()
     {
-        return trans_choice('ticket.postType', 2);
+        return 'Usuario editor';
     }
 }

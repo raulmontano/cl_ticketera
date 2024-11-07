@@ -8,7 +8,12 @@
           <h3 class="card-header">
             #{{$ticket->reference_number}} · {{ $ticket->title }}
             <a class="ml4 float-right" title="Vista pública" target="_blank" href="{{route('requester.tickets.show',$ticket->public_token)}}"> @icon(globe) </a>
-            <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} (<b>{{ $ticket->created_at->diffForHumans() }})</b></div>
+
+            @if($ticket->team->id == 1)
+              <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; enviado a editores el {{ $ticket->time_in_editor->first()->created_at->format('Y-m-d H:i:s') }} (<b>{{ $ticket->created_at->diffForHumans() }})</b></div>
+            @else
+              <div class="text-muted fs2"><b>{{  $ticket->requester->name }}</b> &lt;{{$ticket->requester->email}}&gt; creado el {{ $ticket->created_at->format('Y-m-d H:i:s') }} (<b>{{ $ticket->created_at->diffForHumans() }})</b></div>
+            @endif
 
           </h3>
             <div class="card-body">
@@ -44,6 +49,8 @@
         </div>
         @endcan
 
+
+        @can("addComments", $ticket)
         <div class="col-md-8">
           <div class="actions card mb-3">
             {{ Form::open(["url" => route("comments.store", $ticket) , "files" => true, "id" => "comment-form"]) }}
@@ -91,6 +98,7 @@
 
           </div>
         </div>
+        @endcan
         </div>
       </div>
       @endif

@@ -23,13 +23,13 @@ class TicketAttachment extends Resource
             Text::make('attachments.created_at', __('ticket.created_at'))->displayWith(function ($attachment) {
                 return $attachment->created_at->format('Y-m-d H:i:s');
             }),
-            Text::make('path','Documento'),
+            Text::make('path', 'Documento'),
 
-            Text::make('attachments.id','Agregado por')->displayWith(function ($attachment) {
+            Text::make('attachments.id', 'Agregado por')->displayWith(function ($attachment) {
                 return $attachment->causer ? $attachment->causer->name . ' ('.$attachment->causer->email.')' : '';
             }),
 
-            Link::make('attachments.id','')->displayCallback(function ($attachment) {
+            Link::make('attachments.id', '')->displayCallback(function ($attachment) {
                 return '<i class="fa fa-download"></i>';
             })->route('attachments'),
 
@@ -37,15 +37,15 @@ class TicketAttachment extends Resource
 
         $isEditor = false;
 
-        if(auth()->user()->teams()->count()){
-          //
-          $isEditor = (auth()->user()->teams()->first()->id == 1);
+        if (auth()->user()->teams()->count()) {
+            //
+            $isEditor = (auth()->user()->teams()->first()->id == 1);
         } else {
-          //
+            //
         }
 
-        if($isEditor){
-          $fields[] = Delete::make('delete');
+        if ($isEditor) {
+            $fields[] = Delete::make('delete');
         }
 
         return $fields;
@@ -61,24 +61,40 @@ class TicketAttachment extends Resource
         return [new TicketAttachmentsSearchInfo()];
     }
 
-    public function delete($id){
+    public function delete($id)
+    {
 
       //REMOVE FROM STORAGE
-      $class = (new \ReflectionClass($id->attachable))->getShortName();
-      $pathFile = strtolower($class) . '_'.$id->attachable->id . '/' . $id->path;
-      \Storage::delete($pathFile);
+        $class = (new \ReflectionClass($id->attachable))->getShortName();
+        $pathFile = strtolower($class) . '_'.$id->attachable->id . '/' . $id->path;
+        \Storage::delete($pathFile);
 
-      return parent::delete($id);
+        return parent::delete($id);
     }
 
     public function filters()
     {
-        //return [];
-
         return [
             new TicketAttachmentFilter(),
             new TicketAttachmentReferenceNumberFilter(),
         ];
+    }
+
+    public function actions()
+    {
+        $actions = parent::actions();
+
+        if (auth()->user()->teams()->count()) {
+            //auditor cant delete files
+
+            if (auth()->user()->teams()->first()->id == 3) {
+                $actions = [];
+            }
+        } else {
+            //
+        }
+
+        return $actions;
     }
 
     public function update($id, $newData)
@@ -88,7 +104,14 @@ class TicketAttachment extends Resource
 
     public function canDelete($object)
     {
-        return true;
+        $isAuditor = false;
+
+        if (auth()->user()->teams()->count()) {
+            //auditor cant delete files
+            $isAuditor = (auth()->user()->teams()->first()->id == 3);
+        }
+
+        return $isAuditor ? false :true;
     }
 
     public function canEdit($object)

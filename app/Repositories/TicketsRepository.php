@@ -7,6 +7,42 @@ use Carbon\Carbon;
 
 class TicketsRepository
 {
+    public function getUserTeam($teamId = false)
+    {
+        $hasTeam = false;
+        $findTeams = false;
+
+        if (auth()->user()->teams()->count()) {
+            //
+
+            $findTeams = is_array($teamId) ? $teamId : [$teamId];
+
+            $hasTeam = (bool)auth()->user()->teams()->whereIn('team_id', $findTeams)->first();
+        }
+
+        return $hasTeam;
+    }
+
+    public function getIsAdmin()
+    {
+        return auth()->user()->admin;
+    }
+
+    public function getIsMc()
+    {
+        return $this->getUserTeam(2);
+    }
+
+    public function getIsAuditor()
+    {
+        return $this->getUserTeam(3);
+    }
+
+    public function getIsEditor()
+    {
+        return $this->getUserTeam(1);
+    }
+
     public function escalated()
     {
         if (auth()->user()->assistant) {
@@ -20,6 +56,15 @@ class TicketsRepository
     {
         return auth()->user()->tickets()->where('status', '<', 99);
     }
+    /* FIXME REQUESTER
+        public function unassigned()
+        {
+            if ($this->getIsAdmin()) {
+                return Ticket::whereNull('user_id')->join('requesters', 'requesters.id', '=', 'tickets.requester_id')->where('status', '<', 99);
+            }
+    
+            return auth()->user()->teamsTickets()->whereRaw('tickets.user_id is NULL')->where('status', '<', 99);
+        }*/
 
     public function unassigned()
     {
@@ -37,16 +82,9 @@ class TicketsRepository
 
     public function all()
     {
-        if (auth()->user()->admin) {
-            return Ticket::where('status', '<', 99);
-        }
+        $seeAll = $this->getUserTeam([2,3]); //is Mejora or Auditor
 
-        if (request('filters')) {
-            if (auth()->user()->isEditor()) {
-                //editors should not see tickets that didn't get to editor team
-                return auth()->user()->teamsTickets()->where('status', '<', 99);
-            }
-
+        if ($this->getIsAdmin() || $seeAll) {
             return Ticket::where('status', '<', 99);
         }
 
@@ -65,7 +103,9 @@ class TicketsRepository
 
     public function closed()
     {
-        if (auth()->user()->admin) {
+        $seeAll = $this->getUserTeam([2,3]); //is Mejora or Auditor
+
+        if ($this->getIsAdmin() || $seeAll) {
             return Ticket::where('status', '=', Ticket::STATUS_CLOSED);
         }
 

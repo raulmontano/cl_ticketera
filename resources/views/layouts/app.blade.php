@@ -48,6 +48,16 @@
     <script>
     $( function() {
       $( document ).tooltip();
+
+      $("#filtersForm .reset").click(function(event) {
+          event.preventDefault();
+          $(this).closest('form').find("input[type=text], input[type=date]").val("");
+
+          $(this).closest('form').find("input[type=checkbox]").prop('checked', false);
+
+          return false;
+      });
+
     } );
     </script>
 

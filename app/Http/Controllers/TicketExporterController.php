@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Ticket;
 use App\Repositories\TicketsRepository;
 use App\Repositories\TicketsIndexQuery;
+use App\Filters\TicketFilters as Filters;
 use BadChoice\Thrust\Facades\Thrust;
-use BadChoice\Thrust\ResourceFilters\Filters;
+
+//use BadChoice\Thrust\ResourceFilters\Filters;
 
 class TicketExporterController extends Controller
 {
@@ -61,7 +63,7 @@ class TicketExporterController extends Controller
     private function writeRow($row)
     {
         $this->indexFields->each(function ($field) use ($row) {
-            $this->output .= strip_tags($field->displayInIndex($row)) .';';
+            $this->output .= str_replace(array("\r\n", "\n\r", "\n", "\r"), " ", strip_tags($field->displayInIndex($row))) .';';
         });
         $this->output .= PHP_EOL;
     }

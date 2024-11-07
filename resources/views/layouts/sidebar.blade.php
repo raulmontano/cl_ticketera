@@ -9,6 +9,8 @@
         @include('layouts.sidebar.tickets_editores')
       @elseif($team->id == 2)
         @include('layouts.sidebar.tickets_mejora')
+      @elseif($team->id == 3)
+          @include('layouts.sidebar.tickets_auditoria')
       @endif
     @else
       @include('layouts.sidebar.tickets')
@@ -23,7 +25,7 @@
 
       <h4>Equipos</h4>
       <ul>
-      @foreach(App\Team::get() as $_team)
+      @foreach(App\Team::where('id','!=',3)->get() as $_team)
         <li>
           <div class="hidden" id="register-link2-{{$_team->id}}"> {{ route('register') }}?team_token={{$_team->token}}&team_name={{$_team->name}} </div>
           <a href="#" onclick="copyToClipboard('#register-link2-{{$_team->id}}')">@icon(clipboard) Copiar link de registro {{$_team->name}}</a>

@@ -27,7 +27,7 @@
       <ul>
       @foreach($tickets as $relatedTicket)
         <li style="border-bottom: solid 1px #f0f0f0; padding-bottom:5px; padding-top:5px;">
-          <a target="_blank" href="{{route('requester.tickets.show',$relatedTicket->public_token)}}">#{{  $relatedTicket->reference_number }} </a>
+          <a href="{{route('requester.tickets.show',$relatedTicket->public_token)}}">#{{  $relatedTicket->reference_number }} - {{ __('ticket.' . $relatedTicket->statusName()) }} </a>
         </li>
       @endforeach
       </ul>

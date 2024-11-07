@@ -5,6 +5,7 @@ namespace App\Thrust;
 use Carbon\Carbon;
 use App\Ticket as TicketModel;
 use App\Repositories\TicketsIndexQuery;
+use App\Filters\TicketFilters as Filters;
 use App\ThrustHelpers\Actions\ChangePriority;
 use App\ThrustHelpers\Actions\ChangeStatus;
 use App\ThrustHelpers\Actions\MergeTickets;
@@ -13,6 +14,11 @@ use App\ThrustHelpers\Actions\ExportTickets;
 use App\ThrustHelpers\Fields\Rating;
 use App\ThrustHelpers\Fields\TicketStatusField;
 use App\ThrustHelpers\Filters\EscalatedFilter;
+use App\ThrustHelpers\Filters\InformFilter;
+use App\ThrustHelpers\Filters\IdFilter;
+use App\ThrustHelpers\Filters\UserEditorFilter;
+use App\ThrustHelpers\Filters\CreatedAtFilter;
+use App\ThrustHelpers\Filters\UserMcFilter;
 use App\ThrustHelpers\Filters\PriorityFilter;
 use App\ThrustHelpers\Filters\StatusFilter;
 use App\ThrustHelpers\Filters\TicketTypeFilter;
@@ -27,6 +33,7 @@ use BadChoice\Thrust\Fields\Text;
 use BadChoice\Thrust\Resource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use BadChoice\Thrust\ResourceFilters\Sort;
 
 class Ticket extends Resource
 {
@@ -43,20 +50,46 @@ class Ticket extends Resource
         $fields = [];
 
         if (request()->path() == 'tickets/export') {
+            $fields[] = Text::make('tickets.id', "ID")->displayWith(function ($ticket) {
+                return $ticket->id;
+            });
+
             $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
-                return $ticket->reference_number . ' - '. $ticket->title;
-            })->route('tickets.show');
+                return $ticket->reference_number;
+            });
+
+            $fields[] = Text::make('tickets.title', __('ticket.subject'))->displayWith(function ($ticket) {
+                return $ticket->title;
+            });
+
+            $fields[] = Text::make('tickets.body', __('ticket.body'))->displayWith(function ($ticket) {
+                return $ticket->body;
+            });
         } else {
-            $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
-                return $ticket->reference_number . ' - '. Str::limit($ticket->title, 25);
+            $fields[] = Text::make('tickets.id', "ID")->sortable()->displayWith(function ($ticket) {
+                return $ticket->id;
+            });
+
+            $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->sortable()->displayCallback(function ($ticket) {
+                return $ticket->reference_number;
             })->route('tickets.show');
+
+            $fields[] = Text::make('tickets.subject', __('ticket.subject'))->sortable()->displayWith(function ($ticket) {
+                return Str::limit($ticket->title, 25);
+            });
         }
 
+        /*
+        Número de referencia.
+        Estado.
+        Solicitante.
+        Agente MC. FIX. SORT BY RELATION NAME
+        Tipo de solicitud.
+        Comunicar.
+        Solicitado.
+        */
 
-
-
-
-        $fields[] = Text::make('tickets.status', __('ticket.status'))->displayWith(function ($ticket) {
+        $fields[] = Text::make('tickets.status', __('ticket.status'))->sortable()->displayWith(function ($ticket) {
             return __("ticket." . $ticket->statusName());
         });
 
@@ -76,7 +109,7 @@ class Ticket extends Resource
         if (request()->has('assigned') && !$isEditor) {
             //
         } else {
-            $fields[] = Text::make('tickets.id', trans_choice('ticket.user', 1) . ' MC')->displayWith(function ($ticket) {
+            $fields[] = Text::make('tickets.user_id', trans_choice('ticket.user', 1) . ' MC')->displayWith(function ($ticket) {
                 return $ticket->user_mc ? $ticket->user_mc->name : '<span class="text-nowrap">-- Sin asignar --</span>';
             });
         }
@@ -90,11 +123,11 @@ class Ticket extends Resource
             });
         }
 
-        $fields[] = Text::make('tickets.type', __('ticket.type'))->displayWith(function ($ticket) {
+        $fields[] = Text::make('tickets.ticket_type_id', __('ticket.type'))->sortable()->displayWith(function ($ticket) {
             return '<span class="text-nowrap">'.$ticket->type->name .' '.  $ticket->postType->name .' '.  $ticket->company->name . '</span>';
         });
 
-        $fields[] = Text::make('tickets.inform', __('ticket.inform'))->displayWith(function ($ticket) {
+        $fields[] = Text::make('tickets.inform', __('ticket.inform'))->sortable()->displayWith(function ($ticket) {
             return __("ticket.inform-label." . $ticket->informName());
         });
 
@@ -114,60 +147,88 @@ class Ticket extends Resource
                 });
             }
 
-            $fields[] = Date::make('created_at', __('ticket.requested'))->displayWith(function ($ticket) {
-                $days = $ticket->created_at->diffInDays();
+            if (request()->path() != 'tickets/export') {
+                $fields[] = Date::make('created_at', __('ticket.requested'))->sortable()->displayWith(function ($ticket) {
+                    $days = $ticket->created_at->diffInDays();
 
-                if ($days <= 1) {
-                    $color = 'green';
-                } elseif ($days > 1 && $days <=6) {
-                    $color = 'orange';
-                } else {
-                    $color = 'red';
-                }
+                    if ($days <= 1) {
+                        $color = 'green';
+                    } elseif ($days > 1 && $days <=6) {
+                        $color = 'orange';
+                    } else {
+                        $color = 'red';
+                    }
 
-                return "<span style='color:$color;'>" . $ticket->created_at->diffForHumans() . '</span>';
-            });
+                    return '<span style="color:'.$color.';" class="text-nowrap" title="'.$ticket->created_at->format('H:i:s').'">'. $ticket->created_at->format('Y-m-d') . '</span>';
+                });
+            }
         }
 
-        if (request()->has('pending') || $isEditor) {
-            $fields[] = Text::make('tickets.id', 'Enviado a Editores')->displayWith(function ($ticket) {
-                $timeInEditor = $ticket->time_in_editor->first();
+        if (request()->has('pending')) {
+            if (request()->path() != 'tickets/export') {
+                $fields[] = Text::make('tickets.id', 'Enviado a Editores')->displayWith(function ($ticket) {
+                    $timeInEditor = $ticket->time_in_editor->first();
 
-                if ($timeInEditor) {
-                    return $timeInEditor->created_at->diffForHumans();
-                } else {
-                    return '-';
-                }
-            });
+                    if ($timeInEditor) {
+                        return '<span class="text-nowrap" title="'.$timeInEditor->created_at->format('H:i:s').'">'.$timeInEditor->created_at->format('Y-m-d').'</span>';
+                    } else {
+                        return '-';
+                    }
+                });
+            }
         }
 
         if ($isEditor) {
             $fields[] = Text::make('tickets.id', 'Complejidad / Prioridad')->displayWith(function ($ticket) {
                 //return $ticket->complexityName();
-                return '<span class="label ticket-complexity-'.$ticket->complexityName().'">'. trans("ticket.complexity-label." . $ticket->complexityName()) .'</span>'
-                        .' / <span class="label ticket-priority-'.$ticket->priorityName().'">'. trans("ticket." . $ticket->priorityName()) .'</span>';
+                return '<span class="text-nowrap"><span class="label ticket-complexity-'.$ticket->complexityName().'">'. trans("ticket.complexity-label." . $ticket->complexityName()) .'</span>'
+                        .' / <span class="label ticket-priority-'.$ticket->priorityName().'">'. trans("ticket." . $ticket->priorityName()) .'</span></span>';
             });
 
-            $fields[] = Text::make('tickets.id', 'Fecha compromiso')->displayWith(function ($ticket) {
-                $timeInEditor = $ticket->time_in_editor->first();
+            if (request()->path() != 'tickets/export') {
+                $fields[] = Text::make('tickets.id', 'Enviado a Editores')->displayWith(function ($ticket) {
+                    $timeInEditor = $ticket->time_in_editor->first();
 
-                if ($timeInEditor) {
-                    $dueDate = Carbon::parse(calcularFechaSolucion($timeInEditor->created_at));
-
-                    $days = $dueDate->diffInDays(now(), false);
-
-                    if ($days <= -2) {
-                        $color = 'green';
-                    } elseif ($days <= 0) {
-                        $color = 'orange';
+                    if ($timeInEditor) {
+                        return '<span class="text-nowrap" title="'.$timeInEditor->created_at->format('H:i:s').'">'.$timeInEditor->created_at->format('Y-m-d').'</span>';
                     } else {
-                        $color = 'red';
+                        return '-';
                     }
-                    return "<span style='color:$color;'>" . $dueDate->diffForHumans(). '</span>';
-                } else {
-                    return "-";
-                }
-            });
+                });
+
+                $fields[] = Text::make('tickets.id', 'Fecha compromiso')->displayWith(function ($ticket) {
+                    $timeInEditor = $ticket->time_in_editor->first();
+
+                    if ($timeInEditor) {
+                        $dueDate = Carbon::parse(calcularFechaSolucion($timeInEditor->created_at));
+
+                        $days = $dueDate->diffInDays(now(), false);
+
+                        if ($days <= -2) {
+                            $color = 'green';
+                        } elseif ($days <= 0) {
+                            $color = 'orange';
+                        } else {
+                            $color = 'red';
+                        }
+                        return '<span style="color:'.$color.';" class="text-nowrap" title="'.$dueDate->format('H:i:s').'" >' . $dueDate->format('Y-m-d') . '</span>';
+                    } else {
+                        return "-";
+                    }
+                });
+            } else {
+                $fields[] = Text::make('tickets.id', 'Fecha compromiso')->displayWith(function ($ticket) {
+                    $timeInEditor = $ticket->time_in_editor->first();
+
+                    if ($timeInEditor) {
+                        $dueDate = Carbon::parse(calcularFechaSolucion($timeInEditor->created_at));
+
+                        return $dueDate;
+                    } else {
+                        return "-";
+                    }
+                });
+            }
 
             $fields[] = Text::make('tickets.id', 'Tiempo editores')->displayWith(function ($ticket) {
                 $timeInEditor = $ticket->time_in_editor->first();
@@ -198,6 +259,27 @@ class Ticket extends Resource
                 } else {
                     return "-";
                 }
+            });
+        }
+
+        if (request()->path() == 'tickets/export') {
+            $fields[] = Date::make('created_at', __('ticket.requested'))->displayWith(function ($ticket) {
+                return $ticket->created_at;
+            });
+
+            $fields[] = Date::make('created_at', 'Asignado a agente MC')->displayWith(function ($ticket) {
+                return $ticket->user_mc ? $ticket->user_mc->created_at : null;
+            });
+
+            $fields[] = Text::make('tickets.id', 'Enviado a editores')->displayWith(function ($ticket) {
+                $timeInEditor = $ticket->time_in_editor->first();
+                if ($timeInEditor) {
+                    return $timeInEditor->created_at;
+                }
+            });
+
+            $fields[] = Text::make('tickets.id', 'Fecha cerrado')->displayWith(function ($ticket) {
+                return $ticket->closed_date ? $ticket->closed_date->created_at : null;
             });
         }
 
@@ -237,14 +319,19 @@ class Ticket extends Resource
         //return [];
 
         return [
-            new TitleFilter(),
             new ReferenceNumberFilter(),
+            new IdFilter(),
+            new TitleFilter(),
+            new CreatedAtFilter(),
             new CompanyFilter(),
-            new StatusFilter(),
-            //new PriorityFilter(),
-//            new EscalatedFilter(),
+            new InformFilter(),
             new TicketTypeFilter(),
             new TicketPostTypeFilter(),
+            new StatusFilter(),
+            new UserEditorFilter(),
+            new UserMcFilter(),
+            //new PriorityFilter(),
+//            new EscalatedFilter(),
         ];
     }
 
@@ -256,5 +343,43 @@ class Ticket extends Resource
     public function canEdit($object)
     {
         return false;
+    }
+
+    /**
+     * @return Builder
+     */
+    public function query()
+    {
+        $query = $this->getBaseQuery();
+
+        $this->applySearch($query);
+
+        $this->applySort($query);
+
+        if (request('filters')) {
+            Filters::applyFromRequest($query, request('filters'));
+        }
+        return $query;
+    }
+
+    private function applySort(&$query)
+    {
+        if (request('sort') && $this->sortFieldIsValid(request('sort'))) {
+            return Sort::apply($query, request('sort'), request('sort_order'));
+        }
+
+        if (static::$sortable) {
+            return Sort::apply($query, static::$sortField, 'ASC');
+        }
+
+        return Sort::apply($query, static::$defaultSort, static::$defaultOrder);
+    }
+
+    public function filtersApplied()
+    {
+        if (! request()->has('filters')) {
+            return collect();
+        }
+        return Filters::decodeFilters(request('filters'));
     }
 }

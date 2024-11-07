@@ -93,18 +93,29 @@ class TicketPolicy
 
     public function assignToUser(User $user, Ticket $ticket)
     {
-      return $user->admin || $user->teamsTickets()->pluck('id')->contains($ticket->id);
+        return $user->admin || $user->teamsTickets()->pluck('id')->contains($ticket->id);
+    }
+
+    public function addComments(User $user, Ticket $ticket)
+    {
+        $isAuditor = false;
+
+        if ($user->teams()->count()) {
+            $isAuditor = (bool)$user->teams()->whereIn('team_id', [3])->first();
+        }
+        
+        return !$isAuditor; //auditor cant add comments
     }
 
     public function updateStatus(User $user, Ticket $ticket)
     {
-      //update status only when ticket is assigned to someone
-      return $ticket->user_id && ($user->admin || $user->teamsTickets()->pluck('id')->contains($ticket->id));
+        //update status only when ticket is assigned to someone
+        return $ticket->user_id && ($user->admin || $user->teamsTickets()->pluck('id')->contains($ticket->id));
     }
 
     public function assignToTeam(User $user, Ticket $ticket)
     {
-      return $user->admin;
+        return $user->admin;
     }
 
     public function createIssue(User $user, Ticket $ticket)

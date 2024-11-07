@@ -5,7 +5,7 @@
 body{
 		/*background-color: #f7f7f7;*/
 		background-color: #FFF;
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 }
 
 :root {
@@ -341,8 +341,12 @@ form{
 input[type="checkbox"] {
   width: 20px; /* Ancho personalizado */
   height: 20px; /* Altura personalizada */
-
 }
+
+#filtersForm input[type="checkbox"] {
+  height: 15px; /* Altura personalizada */
+}
+
 .box-check1{
 	width: 100px;
 	padding: 8px;
@@ -763,6 +767,15 @@ textarea{
 	display: none !important;
 }
 
+
+ul.filters {
+	width: 60%;
+}
+
+#content_ticketAttachments ul.filters {
+	width: 40%;
+}
+
 #filtersForm li.text-left {
 	margin-bottom: 25px;
 }
@@ -811,4 +824,9 @@ span.label {
 
 #ticket-info .row {
 	padding-bottom: 2px;
+}
+
+
+.actions.thrust-main-actions > a{
+	margin-right: 10px;
 }

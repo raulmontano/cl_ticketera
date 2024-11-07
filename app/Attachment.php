@@ -23,12 +23,12 @@ class Attachment extends BaseModel
 
         $class = (new \ReflectionClass($attachable))->getShortName();
 
-        $start = strpos($attachable->title,'ID ');
+        $start = strpos($attachable->title, 'ID ');
         $idtext = '';
 
-        if($start !== false){
-          $len = strpos($attachable->title,' -');
-          $idtext = substr($attachable->title,0, $len);
+        if ($start !== false) {
+            $len = strpos($attachable->title, ' -');
+            $idtext = substr($attachable->title, 0, $len);
         }
 
         $user = \Auth::user();
@@ -38,6 +38,7 @@ class Attachment extends BaseModel
             $id = $idtext ? ' - [' . $idtext . ']' : '';
             $path = $attachable->reference_number . $id . ' - ' . str_replace(' ', '_', $file->getClientOriginalName());
             Storage::putFileAs(strtolower($class) . '_'.$attachable->id . '/', $file, $path);
+            
             $attachment = $attachable->attachments()->create(['path' => $path]);
 
             $attachment->causer()->associate($causer)->save();

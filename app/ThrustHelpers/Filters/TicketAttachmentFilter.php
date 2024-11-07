@@ -10,11 +10,14 @@ class TicketAttachmentFilter extends TextFilter
 {
     public function apply(Request $request, $query, $value)
     {
+        return $query->whereHasMorph('attachable', [Ticket::class], function ($query2) use ($value) {
+            $query2->where('tickets.title', 'like', "%{$value}%");
+        });
+    }
 
-        return $query->whereHasMorph('attachable',[Ticket::class], function ($query2) use ($value) {
-                    $query2->where('tickets.title', 'like', "%{$value}%");
-                  });
-
+    public function getCssDiv()
+    {
+        return 'col-md-6';
     }
 
     public function getTitle()

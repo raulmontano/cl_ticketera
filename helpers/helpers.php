@@ -124,7 +124,23 @@ function DiferenciaTiempoTranscurrido($f_asignacion, $pausedTime = 0, $f_solucio
         $tiempoActual = $f_solucionado;
     } else {
         $tiempoActual = date('Y-m-d H:i:s');
+        $hoursActual = date('H');
+        $carbonActual = Carbon::parse($tiempoActual);
     }
+
+    $weekendDays = $f_asignacion->diffInDaysFiltered(function (Carbon $date) {
+        return !$date->isWeekday();
+    }, $tiempoActual);
+
+    //descontar tiempo parcial en caso de consultar el ticket en sabado o domingo
+    if (isset($carbonActual) && ($carbonActual->dayOfWeek == Carbon::SATURDAY || $carbonActual->dayOfWeek == Carbon::SUNDAY)) {
+        $pausedTime += $hoursActual;
+    }
+
+    $pausedTime += $weekendDays * 24 * 60 * 60;
+    //dump($weekendDays, $pausedTime);
+    //dump($days, $f_asignacion->format('Y-m-d H:i:s'), $tiempoActual, $pausedTime);
+
     // Calcular la diferencia en segundos entre f_solucionado y la fecha actual
 
     //echo "Tiempo actual: $tiempoActual<br>";

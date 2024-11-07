@@ -142,7 +142,7 @@ class Ticket extends BaseModel
     public function getUserMcAttribute()
     {
         return $this->events()
-                ->select('users.name', 'users.id', 'users.email')
+                ->select('users.name', 'users.id', 'users.email', 'ticket_events.created_at')
                 ->join('users', 'users.id', 'ticket_events.assigned_to_user_id')
                 ->join('memberships', function ($join) {
                     $join->on('memberships.user_id', '=', 'ticket_events.user_id');
@@ -171,17 +171,23 @@ class Ticket extends BaseModel
                 ->get();
     }
 
-    public function getSolvedDateAttribute()
+    public function getSolvedDateAttribute($status = null)
     {
+        $status = isset($status) ? $status : [4];
+
         return \DB::table('comments')
                 ->select('comments.created_at')
                 ->where('comments.ticket_id', $this->id)
-                ->whereIn('comments.new_status', [4]) //SOLVED
+                ->whereIn('comments.new_status', $status) //SOLVED
                 ->orderBy('comments.id', 'ASC')
                 ->get()
                 ->first();
     }
 
+    public function getClosedDateAttribute()
+    {
+        return $this->getSolvedDateAttribute([4,5,7]);
+    }
 
     public function getKpiPausedTimeAttribute()
     {
@@ -197,7 +203,7 @@ class Ticket extends BaseModel
 
     public function getReferenceNumberAttribute()
     {
-        return $this->created_at->format('Ymd_Hi');
+        return $this->created_at->format('Ymd_His');
     }
 
     public function user()

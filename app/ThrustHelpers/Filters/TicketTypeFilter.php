@@ -17,6 +17,14 @@ class TicketTypeFilter extends SelectFilter
         return $query->where('ticket_type_id', $value);
     }
 
+    public function display($filtersApplied)
+    {
+        return view('components.filters.checkbox', [
+            'filter' => $this,
+            'value'  => $this->filterValue($filtersApplied),
+        ])->render();
+    }
+
     public function options()
     {
         return TicketType::all()->mapWithKeys(function ($type) {

@@ -10,11 +10,19 @@ class CompanyFilter extends SelectFilter
 {
     public function apply(Request $request, $query, $value)
     {
-      if (! $value) {
-          return $query;
-      }
+        if (! $value) {
+            return $query;
+        }
 
-      return $query->where('ticket_company_id', $value);
+        return $query->whereIn('ticket_company_id', $value);
+    }
+
+    public function display($filtersApplied)
+    {
+        return view('components.filters.checkbox', [
+            'filter' => $this,
+            'value'  => $this->filterValue($filtersApplied),
+        ])->render();
     }
 
     public function options()
