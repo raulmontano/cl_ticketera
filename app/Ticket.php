@@ -173,7 +173,7 @@ class Ticket extends BaseModel
 
     public function getSolvedDateAttribute($status = null)
     {
-        $status = isset($status) ? $status : [4];
+        $status = isset($status) ? $status : [self::STATUS_SOLVED];
 
         return \DB::table('comments')
                 ->select('comments.created_at')
@@ -186,7 +186,10 @@ class Ticket extends BaseModel
 
     public function getClosedDateAttribute()
     {
-        return $this->getSolvedDateAttribute([4,5,7]);
+        return $this->getSolvedDateAttribute([self::STATUS_SOLVED,
+                                                self::STATUS_CLOSED,
+                                                self::STATUS_SPAM,
+                                                self::STATUS_ERROR]);
     }
 
     public function getKpiPausedTimeAttribute()
@@ -585,6 +588,19 @@ class Ticket extends BaseModel
         }
 
         return explode('#', $issueEvent->body)[1];
+    }
+
+    public function getContentId()
+    {
+        preg_match_all('/ID\s(\d+)\s-\s/', $this->title, $matches);
+
+        if ($matches && is_array($matches) && count($matches) == 2 && $matches[1]) {
+            $return = current($matches[1]);
+        } else {
+            $return = false;
+        }
+
+        return $return;
     }
 }
 

@@ -24,9 +24,22 @@
         <div class="col-md-4">
           <button class="ph4 btn btn-primary"> {{ __('ticket.assign') }}</button>
         </div>
-
     </div>
     {{ Form::close() }}
+
+    @can("assignContentId", $object)
+      {{ Form::open(["url" => route("{$endpoint}.assign-content-id", $object),"id" => "assign-content-id-form"]) }}
+      <div class="form-row">
+          <div class="col-md-8">
+              {{ __('ticket.content_id') }}:
+              <input type="number" name="content_id" value="{{ $ticket->getContentId() }}">
+          </div>
+          <div class="col-md-4">
+            <button class="ph4 btn btn-primary"> {{ __('ticket.assign') }}</button>
+          </div>
+      </div>
+      {{ Form::close() }}
+    @endcan
 </div>
 
 @push('edit-scripts')

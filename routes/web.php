@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
 
 
     Route::post('tickets/{ticket}/assign', 'TicketsAssignController@store')->name('tickets.assign');
+    Route::post('tickets/{ticket}/assign-content-id', 'TicketsAssignController@assignContentId')->name('tickets.assign-content-id');
     Route::post('tickets/{ticket}/comments', 'CommentsController@store')->name('comments.store');
     Route::resource('tickets/{ticket}/tags', 'TicketsTagsController', ['only' => ['store', 'destroy'], 'as' => 'tickets']);
     Route::post('tickets/{ticket}/reopen', 'TicketsController@reopen')->name('tickets.reopen');
@@ -75,6 +76,8 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
         Route::post('ideas/{idea}/issue', 'IdeaIssueController@store')->name('ideas.issue.store');
 
         Route::resource('users', 'UsersController', ['only' => ['index', 'destroy', 'create']]);
+
+        Route::delete('users/delete/{user}', 'UsersController@delete')->name('user.delete');
         Route::post('users/store', 'UsersController@store')->name('user.store');
         Route::get('users/{user}/impersonate', 'UsersController@impersonate')->name('users.impersonate');
         Route::resource('settings', 'SettingsController', ['only' => ['edit', 'update']]);

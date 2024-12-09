@@ -25,7 +25,7 @@
 
       <h4>Equipos</h4>
       <ul>
-      @foreach(App\Team::where('id','!=',3)->get() as $_team)
+      @foreach(App\Team::whereIn('id',[1,2])->get() as $_team)
         <li>
           <div class="hidden" id="register-link2-{{$_team->id}}"> {{ route('register') }}?team_token={{$_team->token}}&team_name={{$_team->name}} </div>
           <a href="#" onclick="copyToClipboard('#register-link2-{{$_team->id}}')">@icon(clipboard) Copiar link de registro {{$_team->name}}</a>
@@ -40,6 +40,16 @@
             @include('components.sidebarItem', ["url" => route('reports.index'), "title" => trans_choice('report.report', 2) ])
             @include('components.sidebarItem', ["url" => route('reports.analytics'), "title" => trans_choice('report.analytics', 1) ])
     </ul>
+    @endif
+
+
+    @if($team = auth()->user()->teams()->where('teams.token','admin_users')->first())
+      <h4> @icon(cog) {{ trans_choice('admin.admin',2) }}</h4>
+
+      <ul>
+          @include('components.sidebarItem', ["url" => route('users.index'),      "title" => trans_choice('ticket.agent',      2) ])
+      </ul>
+
     @endif
 
 @if(auth()->user()->admin)

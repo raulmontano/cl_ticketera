@@ -13,7 +13,7 @@ class IdFilter extends TextFilter
             return $query;
         }
 
-        return $query->where("tickets.id", $value);
+        return $query->where("tickets.title", 'LIKE', 'ID ' . $value . ' - %');
     }
 
     public function getTitle()

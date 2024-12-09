@@ -7,6 +7,8 @@ use App\Authenticatable\Assistant;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Ticket;
 
 /**
  * @property string name
@@ -14,6 +16,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use Notifiable;
+    use SoftDeletes;
 
     protected $table = 'users';
 
@@ -106,8 +109,14 @@ class User extends Authenticatable
 
     public function delete()
     {
-        $this->tickets()->update(['user_id' => null]);
-        $this->leads()->update(['user_id' => null]);
+        $inProgress = [Ticket::STATUS_NEW, //estatus MC
+                            Ticket::STATUS_OPEN,//estatus MC
+                            Ticket::STATUS_PENDING,//estatus Editores
+                            Ticket::STATUS_PAUSED//estatus Editores
+                          ];
+
+        //Release tickets in progres statuses
+        $this->tickets()->whereIn('status', $inProgress)->update(['user_id' => null]);
 
         return parent::delete();
     }

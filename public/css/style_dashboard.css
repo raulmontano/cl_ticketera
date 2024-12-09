@@ -763,7 +763,7 @@ textarea{
 		background-color: var(--color-secondary) !important
 }
 
-#content_tickets .thrust-table input[type="checkbox"]{
+#content_tickets .thrust-table input[type="checkbox"], #content_agent .thrust-table input[type="checkbox"]{
 	display: none !important;
 }
 
@@ -829,4 +829,8 @@ span.label {
 
 .actions.thrust-main-actions > a{
 	margin-right: 10px;
+}
+
+.thrust-delete {
+	font-size: 17px;
 }

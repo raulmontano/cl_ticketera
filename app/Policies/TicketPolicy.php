@@ -103,7 +103,7 @@ class TicketPolicy
         if ($user->teams()->count()) {
             $isAuditor = (bool)$user->teams()->whereIn('team_id', [3])->first();
         }
-        
+
         return !$isAuditor; //auditor cant add comments
     }
 
@@ -116,6 +116,20 @@ class TicketPolicy
     public function assignToTeam(User $user, Ticket $ticket)
     {
         return $user->admin;
+    }
+
+    public function assignContentId(User $user, Ticket $ticket)
+    {
+        $isEditor = false;
+
+        //TODO- has historial?
+
+        if ($user->teams()->count()) {
+            $isEditor = (bool)$user->teams()->whereIn('team_id', [1])->first();
+        }
+
+        return $isEditor
+                && ('CREAR NOTICIA CLARO' == strtoupper($ticket->type->name).' '.strtoupper($ticket->postType->name).' '.strtoupper($ticket->company->name));
     }
 
     public function createIssue(User $user, Ticket $ticket)

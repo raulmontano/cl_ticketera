@@ -64,7 +64,7 @@ return [
     |
     */
 
-    'timezone' => 'America/Santiago',
+    'timezone' => env('TIME_ZONE', 'America/Santiago'),
 
     /*
     |--------------------------------------------------------------------------

@@ -6,6 +6,7 @@ use App\User;
 use BadChoice\Thrust\Controllers\ThrustController;
 use Hash;
 use Illuminate\Support\Str;
+use BadChoice\Thrust\Facades\Thrust;
 
 class UsersController extends Controller
 {
@@ -16,11 +17,15 @@ class UsersController extends Controller
         // return view('users.index', ['users' => $users]);
     }
 
-    public function destroy(User $user)
+    public function delete(User $user)
     {
-        $user->delete();
+        try {
+            $user->delete();
+        } catch (\Exception $e) {
+            return back()->withErrors(['delete' => $e->getMessage()]);
+        }
 
-        return back();
+        return back()->withMessage(__('thrust::messages.deleted'));
     }
 
     public function create()

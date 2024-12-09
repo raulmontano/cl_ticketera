@@ -3,6 +3,7 @@
 return [
     'all'        => 'Todos',
     'ticket'     => 'Solicitud|Solicitudes',
+    'agent'      => 'Usuario|Usuarios',
     'assigned'   => 'Cliente asignado',
 
     'editor'   => 'Gestor asignado',
@@ -86,6 +87,8 @@ return [
 
     'start_date' => 'Desde',
     'end_date' => 'Hasta',
+
+    'content_id' => 'ID de contenido generado',
 
     'inform-label' => [
       'yes'                => 'Sí',

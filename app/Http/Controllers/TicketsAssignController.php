@@ -22,4 +22,28 @@ class TicketsAssignController extends Controller
         }
         return redirect()->route('tickets.show', $ticket)->withMessage('Ticket asignado');
     }
+
+    public function assignContentId(Ticket $ticket)
+    {
+        $data = request()->all();
+
+        preg_match_all('/ID\s(\d+)\s-\s/', $ticket->title, $matches);
+
+        if (isset($data['content_id'])) {
+            if ($matches && is_array($matches) && count($matches) == 2 && !$matches[1]) {
+                //asignar
+
+                $ticket->title = 'ID ' . $data['content_id'] . ' - ' .$ticket->title;
+                $ticket->save();
+            } else {
+                //actualizar
+                $ticket->title = str_replace('ID ' . $ticket->getContentId() . ' -', 'ID ' . $data['content_id'] . ' -', $ticket->title);
+                $ticket->save();
+            }
+
+            return redirect()->route('tickets.show', $ticket)->withMessage('Id asignado');
+        } else {
+            return redirect()->route('tickets.show', $ticket)->withErrors('No se especificó ningún ID');
+        }
+    }
 }

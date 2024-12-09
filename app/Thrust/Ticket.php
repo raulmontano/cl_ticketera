@@ -11,6 +11,7 @@ use App\ThrustHelpers\Actions\ChangeStatus;
 use App\ThrustHelpers\Actions\MergeTickets;
 use App\ThrustHelpers\Actions\NewTicket;
 use App\ThrustHelpers\Actions\ExportTickets;
+use App\ThrustHelpers\Actions\DailyInform;
 use App\ThrustHelpers\Fields\Rating;
 use App\ThrustHelpers\Fields\TicketStatusField;
 use App\ThrustHelpers\Filters\EscalatedFilter;
@@ -23,6 +24,7 @@ use App\ThrustHelpers\Filters\PriorityFilter;
 use App\ThrustHelpers\Filters\StatusFilter;
 use App\ThrustHelpers\Filters\TicketTypeFilter;
 use App\ThrustHelpers\Filters\TicketPostTypeFilter;
+use App\ThrustHelpers\Filters\TicketDailyInformFilter;
 use App\ThrustHelpers\Filters\TitleFilter;
 use App\ThrustHelpers\Filters\ReferenceNumberFilter;
 use App\ThrustHelpers\Filters\CompanyFilter;
@@ -50,32 +52,56 @@ class Ticket extends Resource
         $fields = [];
 
         if (request()->path() == 'tickets/export') {
-            $fields[] = Text::make('tickets.id', "ID")->displayWith(function ($ticket) {
-                return $ticket->id;
-            });
-
             $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
                 return $ticket->reference_number;
             });
 
+            $fields[] = Text::make('tickets.id', "ID")->displayWith(function ($ticket) {
+                preg_match_all('/ID\s(\d+)\s-\s/', $ticket->title, $matches);
+
+                if ($matches && is_array($matches) && count($matches) == 2) {
+                    return current($matches[1]);
+                } else {
+                    return '';
+                }
+            });
+
             $fields[] = Text::make('tickets.title', __('ticket.subject'))->displayWith(function ($ticket) {
-                return $ticket->title;
+                preg_match_all('/ID\s\d+\s-\s(.+)/', $ticket->title, $matches);
+
+                if ($matches && is_array($matches) && count($matches) == 2 && current($matches[1])) {
+                    return Str::limit(current($matches[1]), 25);
+                } else {
+                    return Str::limit($ticket->title, 25);
+                }
             });
 
             $fields[] = Text::make('tickets.body', __('ticket.body'))->displayWith(function ($ticket) {
                 return $ticket->body;
             });
         } else {
-            $fields[] = Text::make('tickets.id', "ID")->sortable()->displayWith(function ($ticket) {
-                return $ticket->id;
-            });
-
             $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->sortable()->displayCallback(function ($ticket) {
                 return $ticket->reference_number;
             })->route('tickets.show');
 
+            $fields[] = Text::make('tickets.id', "ID")->displayWith(function ($ticket) {
+                preg_match_all('/ID\s(\d+)\s-\s/', $ticket->title, $matches);
+
+                if ($matches && is_array($matches) && count($matches) == 2) {
+                    return current($matches[1]);
+                } else {
+                    return '';
+                }
+            });
+
             $fields[] = Text::make('tickets.subject', __('ticket.subject'))->sortable()->displayWith(function ($ticket) {
-                return Str::limit($ticket->title, 25);
+                preg_match_all('/ID\s\d+\s-\s(.+)/', $ticket->title, $matches);
+
+                if ($matches && is_array($matches) && count($matches) == 2 && current($matches[1])) {
+                    return Str::limit(current($matches[1]), 25);
+                } else {
+                    return Str::limit($ticket->title, 25);
+                }
             });
         }
 
@@ -288,7 +314,7 @@ class Ticket extends Resource
 
     public function getFields()
     {
-        return $this->fields();
+        return $this->fields(); //override to remove default row actions "edit","delete"
     }
 
     protected function getBaseQuery()
@@ -306,6 +332,7 @@ class Ticket extends Resource
         return [
             new NewTicket(),
             new ExportTickets(),
+            new DailyInform(),
         ];
     }
 
@@ -330,6 +357,7 @@ class Ticket extends Resource
             new StatusFilter(),
             new UserEditorFilter(),
             new UserMcFilter(),
+            new TicketDailyInformFilter(),
             //new PriorityFilter(),
 //            new EscalatedFilter(),
         ];

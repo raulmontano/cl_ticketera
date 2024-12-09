@@ -63,7 +63,9 @@ class TicketExporterController extends Controller
     private function writeRow($row)
     {
         $this->indexFields->each(function ($field) use ($row) {
-            $this->output .= str_replace(array("\r\n", "\n\r", "\n", "\r"), " ", strip_tags($field->displayInIndex($row))) .';';
+            //replace double quote for single quote
+            $fieldText = str_replace('"', "'", strip_tags($field->displayInIndex($row)));
+            $this->output .= '"'.str_replace(["\r\n", "\n\r", "\n", "\r"], " ", $fieldText) .'";';
         });
         $this->output .= PHP_EOL;
     }

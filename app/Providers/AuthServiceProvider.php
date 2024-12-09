@@ -29,7 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('see-admin', function ($user) {
-            return $user->admin;
+            return $user->admin || auth()->user()->teams()->where('teams.token', 'admin_users')->first();
         });
     }
 }

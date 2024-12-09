@@ -9,6 +9,9 @@ use BadChoice\Thrust\Fields\HasMany;
 use BadChoice\Thrust\Fields\Link;
 use BadChoice\Thrust\Fields\Text;
 use BadChoice\Thrust\Resource;
+use App\Repositories\AgentIndexQuery;
+
+use App\ThrustHelpers\Fields\Delete;
 
 class Agent extends Resource
 {
@@ -22,17 +25,23 @@ class Agent extends Resource
         return [
             Text::make('name', __('user.name'))->sortable(),
             Email::make('email', __('user.email'))->sortable(),
-            HasMany::make('teams'),
-            Date::make('created_at', __('ticket.requested'))->showInTimeAgo()->sortable(),
-            Date::make('updated_at', __('ticket.updated'))->showInTimeAgo()->sortable(),
-            Link::make('id', 'impersonate')->route('users.impersonate')->icon('key'),
+            HasMany::make('teams', __('user.teams')),
+            Date::make('created_at', __('user.created_at'))->sortable(),
+            Date::make('updated_at', __('user.updated_at'))->sortable(),
+            Delete::make('delete'),
+            //Link::make('id', 'impersonate')->route('users.impersonate')->icon('key'),
         ];
+    }
+
+    public function getFields()
+    {
+        return $this->fields(); //override to remove default row actions "edit","delete"
     }
 
     public function mainActions()
     {
         return [
-            new NewUser, //Not working yet all new agents are created with invitation link
+            //new NewUser, //Not working yet all new agents are created with invitation link
         ];
     }
 
@@ -49,5 +58,10 @@ class Agent extends Resource
     public function canEdit($object)
     {
         return false;
+    }
+
+    protected function getBaseQuery()
+    {
+        return AgentIndexQuery::get()->with($this->getWithFields());
     }
 }
