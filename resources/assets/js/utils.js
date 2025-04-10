@@ -22,12 +22,11 @@ function toggleSidebar(){
     $('#sidebar').animate({"left":position + "px"}, 200);
 }
 
-var csrf_token = "{{ csrf_token() }}";
+var csrf_token = $('meta[name=csrf-token]').attr('content');
 $(".delete-resource, .delete-resource-simple").on('click',function(e){
-    if (! confirm("Are you sure?")){ return false; }
+    if (! confirm("¿Estas seguro de inactivarlo?")){ return false; }
     else{
         e.preventDefault();
         var url = $(this).attr('href');
         $('<form action="' + url + '" method="POST"><input type="hidden" name="_method" value="DELETE"><input type="hidden" name="_token" value="' + csrf_token + '"></form>').appendTo('body').submit();
-    }
-});
+    }});

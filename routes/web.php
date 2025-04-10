@@ -31,13 +31,13 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
     Route::put('profile', 'ProfileController@update')->name('profile.update');
     Route::post('password', 'ProfileController@password')->name('profile.password');
 
+    Route::get('dashboard', 'TicketsDashboard@index')->name('tickets.dashboard');
+
     Route::get('tickets/export', 'TicketExporterController@export')->name('tickets.export');
     Route::get('tickets/merge', 'TicketsMergeController@index')->name('tickets.merge.index');
     //Route::post('tickets/merge', 'TicketsMergeController@store')->name('tickets.merge.store');
     Route::get('tickets/search/{text}', 'TicketsSearchController@index')->name('tickets.search');
     Route::resource('tickets', 'TicketsController', ['except' => ['edit', 'destroy','export']]);
-
-
 
     Route::post('tickets/{ticket}/assign', 'TicketsAssignController@store')->name('tickets.assign');
     Route::post('tickets/{ticket}/assign-content-id', 'TicketsAssignController@assignContentId')->name('tickets.assign-content-id');

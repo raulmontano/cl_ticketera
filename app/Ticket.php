@@ -103,26 +103,28 @@ class Ticket extends BaseModel
         return $ticket;
     }
 
-    public function updateWith($title, $body, $channels, $categories, $type, $company, $post_type, $priority, $inform, $complexity, $start_date, $end_date)
+    public function updateWith($request)
     {
         $this->update([
-          'title'        => substr($title, 0, 190),
-          'body'         => $body,
-          'ticket_type_id'         => $type,
-          'ticket_company_id'         => $company,
-          'ticket_post_type_id'         => $post_type,
-          'priority' => $priority,
-          'complexity' => $complexity,
-          'inform' => $inform,
-          'start_date' => $start_date,
-          'end_date'=> $end_date,
+          'title'        => substr($request->get('title'), 0, 190),
+          'body'         => $request->get('body'),
+          'ticket_type_id'         => $request->get('type'),
+          'ticket_company_id'         => $request->get('company'),
+          'ticket_post_type_id'         => $request->get('post_type'),
+          'priority' => $request->get('priority') ?:1,
+          'complexity' => $request->get('complexity'),
+          'inform' => $request->get('inform'),
+          'start_date' => $request->get('start_date'),
+          'end_date'=> $request->get('end_date'),
+          'read_validation' => $request->get('read_validation')?:0,
+          'popup_needed' => $request->get('popup_needed')?:0
         ]);
 
         $channels[] = 'Solicitante de Contenido'; //FIXME PARA QUE LO QUIEREN HARDCOEADO?
 
-        $this->syncTags($channels); //channels
+        $this->syncTags($request->get('channels')); //channels
 
-        $this->syncCategories($categories);
+        $this->syncCategories($request->get('categories'));
 
         return $this;
     }
@@ -592,7 +594,7 @@ class Ticket extends BaseModel
 
     public function getContentId()
     {
-        preg_match_all('/ID\s(\d+)\s-\s/', $this->title, $matches);
+        preg_match_all('/ID\s(\d+)\s-\s?/', $this->title, $matches);
 
         if ($matches && is_array($matches) && count($matches) == 2 && $matches[1]) {
             $return = current($matches[1]);
@@ -603,9 +605,3 @@ class Ticket extends BaseModel
         return $return;
     }
 }
-
-/*
-ALTER TABLE `tickets`
-ADD `complexity` tinyint(4) NOT NULL AFTER `priority`,
-ADD `inform` tinyint(4) NOT NULL AFTER `complexity`;
-*/

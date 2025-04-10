@@ -128,8 +128,7 @@ class TicketPolicy
             $isEditor = (bool)$user->teams()->whereIn('team_id', [1])->first();
         }
 
-        return $isEditor
-                && ('CREAR NOTICIA CLARO' == strtoupper($ticket->type->name).' '.strtoupper($ticket->postType->name).' '.strtoupper($ticket->company->name));
+        return $isEditor;
     }
 
     public function createIssue(User $user, Ticket $ticket)

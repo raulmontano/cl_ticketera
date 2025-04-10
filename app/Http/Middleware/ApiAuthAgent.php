@@ -18,6 +18,7 @@ class ApiAuthAgent
      */
     public function handle($request, Closure $next)
     {
+
         if (! request()->hasHeader('token')) {
             return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
         }

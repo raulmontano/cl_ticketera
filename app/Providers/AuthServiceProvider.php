@@ -31,5 +31,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('see-admin', function ($user) {
             return $user->admin || auth()->user()->teams()->where('teams.token', 'admin_users')->first();
         });
+
+        Gate::define('see-dashboard', function ($user) {
+            return auth()->user()->teams()->where('teams.token', 'dashboard')->first();
+        });
     }
 }

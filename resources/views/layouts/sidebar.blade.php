@@ -4,6 +4,14 @@
     </div>
     <img class="logo" src="{{ url("/images/logo_grey.png") }}">
 
+    @can('see-dashboard')
+    <br>
+    <br>
+    <ul>
+      <li><a href="{{ route('tickets.dashboard') }}" style="font-size:14px; font-weight: 700; color: #c8c8c8;"><i class="fa fa-dashboard"></i>&nbsp;Dashboard</a></li>
+    </ul>
+    @endcan
+
     @if($team = auth()->user()->teams()->first())
       @if($team->id == 1)
         @include('layouts.sidebar.tickets_editores')

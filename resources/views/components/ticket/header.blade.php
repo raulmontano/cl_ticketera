@@ -51,6 +51,19 @@
             {{ __('ticket.end_date')}} {{  $ticket->end_date }}
             @endif
           </div>
+
+          @if($ticket->popup_needed || $ticket->read_validation)
+            <div class="row">
+              @if($ticket->popup_needed)
+                <span class="label idea-status-open" style="color:black; margin-right: 5px;">{{ __('ticket.popup_needed')}}</span>
+              @endif
+
+              @if($ticket->read_validation)
+                <span class="label idea-status-accepted" style="color:black;">{{ __('ticket.read_validation')}}</span>
+              @endif
+            </div>
+          @endif
+
         </div>
 
         @if(auth()->user()->isEditor())
@@ -125,6 +138,25 @@
           </label>
         </div>
       </div>
+
+      <div class="form-row">
+        <div class="form-check">
+          <input name="popup_needed" id="popup_needed" class="form-check-input" @if($ticket->popup_needed) checked @endif type="checkbox" value="1" />
+          <label class="form-check-label check" for="popup_needed">
+            <strong>{{ __('ticket.popup_needed')}}</strong>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-check">
+          <input name="read_validation" id="read_validation" class="form-check-input" @if($ticket->read_validation) checked @endif type="checkbox" value="1" />
+          <label class="form-check-label check" for="read_validation">
+            <strong>{{ __('ticket.read_validation')}}</strong>
+          </label>
+        </div>
+      </div>
+
     </div>
   </div>
 

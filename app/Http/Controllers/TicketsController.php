@@ -122,20 +122,7 @@ class TicketsController extends Controller
 
         $this->validate(request(), $rules);
 
-        $ticket->updateWith(
-            request('title'),
-            request('body'),
-            request('channels'),
-            request('categories'),
-            request('type'),
-            request('company'),
-            request('post_type'),
-            request('priority') ?:1,
-            request('inform'),
-            request('complexity'),
-            request('start_date'),
-            request('end_date'),
-            );
+        $ticket->updateWith(request());
 
         if ($ticket && request()->hasFile('attachment')) {
             Attachment::storeAttachmentFromRequest(request(), $ticket);

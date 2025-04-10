@@ -51,13 +51,13 @@ class Ticket extends Resource
 
         $fields = [];
 
-        if (request()->path() == 'tickets/export') {
+        if (in_array(request()->path(),['tickets/export','api/tickets/export'])) {
             $fields[] = Link::make('tickets.id', __('ticket.reference_number'))->displayCallback(function ($ticket) {
                 return $ticket->reference_number;
             });
 
             $fields[] = Text::make('tickets.id', "ID")->displayWith(function ($ticket) {
-                preg_match_all('/ID\s(\d+)\s-\s/', $ticket->title, $matches);
+                preg_match_all('/ID\s(\d+)\s-\s?/', $ticket->title, $matches);
 
                 if ($matches && is_array($matches) && count($matches) == 2) {
                     return current($matches[1]);
@@ -67,7 +67,7 @@ class Ticket extends Resource
             });
 
             $fields[] = Text::make('tickets.title', __('ticket.subject'))->displayWith(function ($ticket) {
-                preg_match_all('/ID\s\d+\s-\s(.+)/', $ticket->title, $matches);
+                preg_match_all('/ID\s\d+\s-\s?(.+)/', $ticket->title, $matches);
 
                 if ($matches && is_array($matches) && count($matches) == 2 && current($matches[1])) {
                     return Str::limit(current($matches[1]), 25);
@@ -85,7 +85,7 @@ class Ticket extends Resource
             })->route('tickets.show');
 
             $fields[] = Text::make('tickets.id', "ID")->displayWith(function ($ticket) {
-                preg_match_all('/ID\s(\d+)\s-\s/', $ticket->title, $matches);
+                preg_match_all('/ID\s(\d+)\s-\s?/', $ticket->title, $matches);
 
                 if ($matches && is_array($matches) && count($matches) == 2) {
                     return current($matches[1]);
@@ -288,7 +288,7 @@ class Ticket extends Resource
             });
         }
 
-        if (request()->path() == 'tickets/export') {
+        if (in_array(request()->path(),['tickets/export','api/tickets/export'])) {
             $fields[] = Date::make('created_at', __('ticket.requested'))->displayWith(function ($ticket) {
                 return $ticket->created_at;
             });
@@ -329,11 +329,21 @@ class Ticket extends Resource
 
     public function mainActions()
     {
-        return [
+        $actions = [
             new NewTicket(),
             new ExportTickets(),
-            new DailyInform(),
         ];
+
+        if (auth()->user()->teams()->count()) {
+            //
+            $isEditor = (auth()->user()->teams()->first()->id == 1);
+        }
+
+        if ($isEditor) {
+            $actions[] = new DailyInform();
+        }
+
+        return $actions;
     }
 
     public function actions()

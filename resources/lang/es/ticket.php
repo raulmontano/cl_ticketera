@@ -12,6 +12,10 @@ return [
     'newTicket'  => 'Crear Solicitud',
     'edit'           => 'Editar Solicitud',
 
+
+    'popup_needed' => 'PopUp',
+    'read_validation' => 'Validación de lectura',
+
     'unassigned' => 'Sin asignar',
     'unanswered' => 'Sin respuesta',
     'archive'    => 'Archivar',

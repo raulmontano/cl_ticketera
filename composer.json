@@ -15,6 +15,7 @@
         "ext-imap": "*",
         "badchoice/hurricane": "^1.0",
         "badchoice/thrust": "^0.5",
+        "barryvdh/laravel-debugbar": "^3.7",
         "drewm/mailchimp-api": "^2.4",
         "fideloper/proxy": "^4.2",
         "fzaninotto/faker": "^1.4",

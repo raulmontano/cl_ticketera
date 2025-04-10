@@ -27,7 +27,7 @@ class TicketsAssignController extends Controller
     {
         $data = request()->all();
 
-        preg_match_all('/ID\s(\d+)\s-\s/', $ticket->title, $matches);
+        preg_match_all('/ID\s(\d+)\s-\s?/', $ticket->title, $matches);
 
         if (isset($data['content_id'])) {
             if ($matches && is_array($matches) && count($matches) == 2 && !$matches[1]) {

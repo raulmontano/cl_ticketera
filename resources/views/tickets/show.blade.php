@@ -24,13 +24,13 @@
               @include('components.ticket.header')
               @include('components.ticket.merged')
 
-              @if( $ticket->canBeEdited() )
+              
                   <div id="edit-ticket-button" class="float-right mr4">
 
                     <button class="btn btn-primary" onClick="$('#edit-ticket-button').hide(); $('#ticket-info').hide(); $('#ticket-edit').show()">{{ __('ticket.edit') }}</button>
 
                   </div>
-              @endif
+              
 
             </div>
         </div>
