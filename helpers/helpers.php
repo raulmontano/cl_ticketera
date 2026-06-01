@@ -58,62 +58,86 @@ function toPercentage($value, $inverse = false)
 
 //date_default_timezone_set('America/Santiago');
 
-function calcularFechaSolucion($f_asignacion, $id_solicitud = null)
+
+function calcularFechaSolucion($f_asignacion)
 {
-
-    // Verificar si $f_asignacion es null
-    if ($f_asignacion === null) {
-        return "<span style='color:#ccc'>No disponible</span>";
-    }
-
-    switch (date('N', strtotime($f_asignacion))) {
-        case 4://DIA JUEVES
-            $f_solucion = diaJueves($f_asignacion, $id_solicitud);
-            break;
-
-        case 5://DIA VIERNES
-            $f_solucion = diaViernes($f_asignacion, $id_solicitud);
-            break;
-
-        default:
-            $f_solucion = diasLunesMiercoles($f_asignacion, $id_solicitud);
-            break;
-    }
-
-    return $f_solucion !== null ? date('Y-m-d H:i:s', (int)$f_solucion) : null;
-}
-
-function calcularDia($f_asignacion, $dias)
-{
-    $f_solucion = strtotime($f_asignacion . ' +' . $dias . ' days');
-
-    if ($f_solucion !== false) {
-        // Realizar la consulta a la base de datos para verificar feriados
-        // $feriadoInfo = obtenerInformacionFeriado($f_solucion);
-
-        // Lógica para manejar feriados y feriados continuos
-        // ...
-
-        return $f_solucion;
-    } else {
-        // Manejar el caso en que strtotime falla
+    if (empty($f_asignacion)) {
         return null;
     }
+
+    $timestamp = is_numeric($f_asignacion)
+        ? (int) $f_asignacion
+        : strtotime($f_asignacion);
+
+    if ($timestamp === false) {
+        return null;
+    }
+
+    $fechaCambio = strtotime('2026-06-01 00:00:00');
+
+    if ($timestamp < $fechaCambio) {
+        $diasHabiles = 2;
+    } else {
+        $diasHabiles = (int) env('COMMITMENT_DAYS', 3);
+    }
+
+    $fechaCompromiso = $timestamp;
+    $diasAgregados = 0;
+
+    while ($diasAgregados < $diasHabiles) {
+
+        $fechaCompromiso = strtotime('+1 day', $fechaCompromiso);
+
+        $diaSemana = (int) date('N', $fechaCompromiso);
+
+        // Lunes(1) a Viernes(5)
+        if ($diaSemana <= 5) {
+            $diasAgregados++;
+        }
+    }
+
+    return date('Y-m-d H:i:s', $fechaCompromiso);
 }
 
-function diaJueves($f_asignacion, $id_solicitud)
-{
-    return calcularDia($f_asignacion, 3);//cambie de 1 a 3
-}
 
-function diasLunesMiercoles($f_asignacion, $id_solicitud)
+function obtenerSemaforoCompromiso($fechaCompromiso, $fechaRealSolucion = null)
 {
-    return calcularDia($f_asignacion, 3);//cambie de 1 a 3
-}
+    if (empty($fechaCompromiso)) {
+        return null;
+    }
 
-function diaViernes($f_asignacion, $id_solicitud)
-{
-    return calcularDia($f_asignacion, 4);//cambie de 3 a 6
+    $fechaCompromisoTs = is_numeric($fechaCompromiso)
+        ? (int) $fechaCompromiso
+        : strtotime($fechaCompromiso);
+
+    if ($fechaCompromisoTs === false) {
+        return null;
+    }
+
+    // Si ya existe una fecha de solución,
+    // evaluamos contra ella; de lo contrario contra hoy.
+    $fechaReferenciaTs = !empty($fechaRealSolucion)
+        ? (is_numeric($fechaRealSolucion)
+            ? (int) $fechaRealSolucion
+            : strtotime($fechaRealSolucion))
+        : time();
+
+    if ($fechaReferenciaTs === false) {
+        return null;
+    }
+
+    $diaCompromiso = date('Y-m-d', $fechaCompromisoTs);
+    $diaReferencia = date('Y-m-d', $fechaReferenciaTs);
+
+    if ($diaReferencia < $diaCompromiso) {
+        return '#2ECC71';
+    }
+
+    if ($diaReferencia === $diaCompromiso) {
+        return '#F4D03F';
+    }
+
+    return '#E74C3C';
 }
 
 function DiferenciaTiempoTranscurrido($f_asignacion, $pausedTime = 0, $f_solucionado = false)

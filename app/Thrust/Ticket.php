@@ -228,15 +228,14 @@ class Ticket extends Resource
                     if ($timeInEditor) {
                         $dueDate = Carbon::parse(calcularFechaSolucion($timeInEditor->created_at));
 
-                        $days = $dueDate->diffInDays(now(), false);
-
-                        if ($days <= -2) {
-                            $color = 'green';
-                        } elseif ($days <= 0) {
-                            $color = 'orange';
+                        if($ticket->status == TicketModel::STATUS_SOLVED) {
+                            $solvedDate = $ticket->solved_date ? $ticket->solved_date->created_at : null;
                         } else {
-                            $color = 'red';
+                            $solvedDate = null;
                         }
+
+                        $color = obtenerSemaforoCompromiso($dueDate, $solvedDate);  
+
                         return '<span style="color:'.$color.';" class="text-nowrap" title="'.$dueDate->format('H:i:s').'" >' . $dueDate->format('Y-m-d') . '</span>';
                     } else {
                         return "-";
