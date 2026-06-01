@@ -46,6 +46,26 @@ class TicketsController extends Controller
           'type'      => 'required|exists:ticket_types,id',
           'company'   => 'required|exists:ticket_companies,id',
           'team_id'   => 'nullable|exists:teams,id',
+
+          'attachment'   => 'nullable|array',
+            'attachment.*' => [
+                                'file',
+                                'mimes:pdf,doc,docx,xls,xlsx,xlsm,ppt,pptx,jpg,jpeg,png,gif,webp,svg',
+                            'mimetypes:'
+                                . 'application/pdf,'
+                                . 'application/msword,'
+                                . 'application/vnd.openxmlformats-officedocument.wordprocessingml.document,'
+                                . 'application/vnd.ms-excel,'
+                                . 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,'
+                                . 'application/vnd.ms-excel.sheet.macroEnabled.12,'
+                                . 'application/vnd.ms-powerpoint,'
+                                . 'application/vnd.openxmlformats-officedocument.presentationml.presentation,'
+                                . 'image/jpeg,'
+                                . 'image/png,'
+                                . 'image/gif,'
+                                . 'image/webp,'
+                                . 'image/svg+xml',
+                            ],
       ];
 
         if ($user = \Auth::user()) {
@@ -61,7 +81,15 @@ class TicketsController extends Controller
             \Session::flash('message', 'Selecciona nuevamente los archivos');
         }
 
-        $this->validate(request(), $rules);
+        $messages = [
+            // Attachments
+            'attachment.array'        => 'Los archivos adjuntos no son válidos.',
+            'attachment.*.file'       => 'El archivo debe ser válido.',
+            'attachment.*.mimes'      => 'Formato no permitido. Solo PDF, Word, Excel, PowerPoint o imágenes.',
+            'attachment.*.mimetypes'  => 'Formato no permitido. Solo PDF, Word, Excel, PowerPoint o imágenes.',
+        ];
+
+        $this->validate(request(), $rules,$messages);
 
         \Session::forget('alert-type');
         \Session::forget('message');
@@ -118,21 +146,42 @@ class TicketsController extends Controller
                     'company'   => 'required|exists:ticket_companies,id',
                     //'team_id'   => 'nullable|exists:teams,id',
                     //'priority'  => 'required|integer',
+          'attachment'   => 'nullable|array',
+            'attachment.*' => [
+                                'file',
+                                'mimes:pdf,doc,docx,xls,xlsx,xlsm,ppt,pptx,jpg,jpeg,png,gif,webp,svg',
+                            'mimetypes:'
+                                . 'application/pdf,'
+                                . 'application/msword,'
+                                . 'application/vnd.openxmlformats-officedocument.wordprocessingml.document,'
+                                . 'application/vnd.ms-excel,'
+                                . 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,'
+                                . 'application/vnd.ms-excel.sheet.macroEnabled.12,'
+                                . 'application/vnd.ms-powerpoint,'
+                                . 'application/vnd.openxmlformats-officedocument.presentationml.presentation,'
+                                . 'image/jpeg,'
+                                . 'image/png,'
+                                . 'image/gif,'
+                                . 'image/webp,'
+                                . 'image/svg+xml',
+                            ],
                 ];
 
-        $this->validate(request(), $rules);
+        $messages = [
+            // Attachments
+            'attachment.array'        => 'Los archivos adjuntos no son válidos.',
+            'attachment.*.file'       => 'El archivo debe ser válido.',
+            'attachment.*.mimes'      => 'Formato no permitido. Solo PDF, Word, Excel, PowerPoint o imágenes.',
+            'attachment.*.mimetypes'  => 'Formato no permitido. Solo PDF, Word, Excel, PowerPoint o imágenes.',
+        ];
+
+        $this->validate(request(), $rules,$messages);
 
         $ticket->updateWith(request());
 
         if ($ticket && request()->hasFile('attachment')) {
             Attachment::storeAttachmentFromRequest(request(), $ticket);
         }
-
-        /*
-        $notification = array(
-                'message' => 'Successfully Done',
-                'alert-type' => 'success'
-            );*/
 
         return back()->withMessage('Actualizado');
     }

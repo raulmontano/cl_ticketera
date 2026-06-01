@@ -15,6 +15,8 @@ use App\ThrustHelpers\Fields\Delete;
 
 class Agent extends Resource
 {
+
+    
     public static $model        = \App\User::class;
     public static $search       = ['name', 'email'];
     public static $defaultSort  = 'updated_at';
@@ -23,6 +25,7 @@ class Agent extends Resource
     public function fields()
     {
         return [
+            Text::make('id', __('user.id'))->sortable(),
             Text::make('name', __('user.name'))->sortable(),
             Email::make('email', __('user.email'))->sortable(),
             HasMany::make('teams', __('user.teams')),

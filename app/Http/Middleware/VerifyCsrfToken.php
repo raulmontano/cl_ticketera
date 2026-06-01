@@ -14,5 +14,6 @@ class VerifyCsrfToken extends BaseVerifier
     protected $except = [
         'webhook/*',
         'thrust/attachments/*',
+        'requester/tickets/create',
     ];
 }

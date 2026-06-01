@@ -12,6 +12,7 @@ class UsersController extends Controller
 {
     public function index()
     {
+
         return (new ThrustController())->index('agent');
         // $users = User::with('teams')->paginate(25);
         // return view('users.index', ['users' => $users]);

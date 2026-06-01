@@ -16,8 +16,19 @@ Route::get('/', 'HomeController@index');
 Auth::routes();
 
 Route::group(['prefix' => 'requester'], function () {
-    Route::get('tickets/create', 'RequesterTicketsController@create')->name('requester.tickets.create');
-    Route::post('tickets/store', 'RequesterTicketsController@store')->name('requester.tickets.store');
+
+    Route::get('tickets/create', 'RequesterTicketsController@verify')->name('requester.tickets.verify');
+
+    Route::group(['middleware' => 'somosclave.session'], function () {
+        Route::post('tickets/create', 'RequesterTicketsController@create')->name('requester.tickets.create');
+        Route::post('tickets/store', 'RequesterTicketsController@store')->name('requester.tickets.store');
+    });
+
+    Route::get('tickets/test', 'RequesterTicketsController@test')->name('requester.tickets.test');
+
+    Route::get('access-denied', function () {
+        return view('requester.errors.access-denied');
+    })->name('requester.access-denied');
 
     Route::get('tickets/{token}', 'RequesterTicketsController@show')->name('requester.tickets.show');
     Route::post('tickets/{token}/comments', 'RequesterCommentsController@store')->name('requester.comments.store');
@@ -37,7 +48,7 @@ Route::group(['middleware' => ['auth', 'userLocale']], function () {
     Route::get('tickets/merge', 'TicketsMergeController@index')->name('tickets.merge.index');
     //Route::post('tickets/merge', 'TicketsMergeController@store')->name('tickets.merge.store');
     Route::get('tickets/search/{text}', 'TicketsSearchController@index')->name('tickets.search');
-    Route::resource('tickets', 'TicketsController', ['except' => ['edit', 'destroy','export']]);
+    Route::resource('tickets', 'TicketsController', ['except' => ['edit', 'destroy', 'export']]);
 
     Route::post('tickets/{ticket}/assign', 'TicketsAssignController@store')->name('tickets.assign');
     Route::post('tickets/{ticket}/assign-content-id', 'TicketsAssignController@assignContentId')->name('tickets.assign-content-id');

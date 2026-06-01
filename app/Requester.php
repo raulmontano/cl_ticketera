@@ -23,7 +23,7 @@ class Requester extends BaseModel
             throw new \Exception(__('validation.ticketCommentInjection'));
         }
     }
-
+    
     public function tickets()
     {
         return $this->hasMany(Ticket::class);

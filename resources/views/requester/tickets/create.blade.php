@@ -8,13 +8,15 @@
 
       <div class="form-group col-md-3">
           <label for="requester_name">{{trans_choice('ticket.requester',2) }}</label>
-          <input type="name" id="requester_name" name="requester[name]" class="form-control" required value="{{ old('requester.name') ? old('requester.name') : (request()->has('name') ? request()->get('name') : '' )}}"/>
+          <input type="name" id="requester_name" name="requester[name]" class="form-control" required value="{{ old('requester.name') ? old('requester.name') : (isset($user_name) ? $user_name : '' )}}"/>
       </div>
 
       <div class="form-group col-md-3">
           <label for="requester_email">{{ __('user.email') }}</label>
-          <input type="email" id="requester_email" name="requester[email]" class="form-control" required value="{{ old('requester.email') ? old('requester.email') : (request()->has('email') ? request()->get('email') : '' )}}"/>
+          <input type="email" id="requester_email" name="requester[email]" class="form-control" required value="{{ old('requester.email') ? old('requester.email') : (isset($user_email) ? $user_email : '' )}}"/>
       </div>
+
+      <input type="hidden" id="somosclave_token" name="somosclave_token" class="form-control" required value="{{ old('somosclave_token') ? old('somosclave_token') : (isset($somosclave_token) ? $somosclave_token : '' )}}"/>
 
     </div>
 

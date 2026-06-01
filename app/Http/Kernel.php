@@ -59,5 +59,6 @@ class Kernel extends HttpKernel
         'apiAuth'      => Middleware\ApiAuth::class,
         'apiAuthAgent' => Middleware\ApiAuthAgent::class,
         'userLocale'   => Middleware\UserLocale::class,
+        'somosclave.session' => \App\Http\Middleware\ValidateSomosClaveToken::class,
     ];
 }
